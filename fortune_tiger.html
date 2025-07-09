@@ -30,7 +30,7 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto; /* <--- AQUI ESTÁ A MUDANÇA PARA PERMITIR ROLAGEM VERTICAL */
             text-align: center;
             box-sizing: border-box;
         }
@@ -798,86 +798,68 @@
                     } else { // Símbolo vencedor não é Wild
                         basePayoutMultiplier = payouts[actualWinningSymbol];
                     }
-
+                    
                     lineWinAmount = betAmount * basePayoutMultiplier;
                     totalWinAmount += lineWinAmount;
                     winningLinesCount++;
 
-                    // Adiciona os slots vencedores para destaque
-                    line.forEach(pos => {
-                        highlightSlots.add(`${pos[0]}-${pos[1]}`); // Guarda rolo-slot
-                    });
+                    // Adiciona os slots para destaque
+                    line.forEach(([r, s]) => highlightSlots.add(`${r}-${s}`));
                 }
             }
 
-            let message = "";
-            let isBigWin = false;
-
-            // Multiplicador 10x para tela cheia
-            if (fullScreenMatch && totalWinAmount > 0) { // Garante que houve um ganho e a tela foi preenchida
+            // Aplica o multiplicador x10 se houver tela cheia do mesmo símbolo (ou com Wilds)
+            if (fullScreenMatch && totalWinAmount > 0) {
                 totalWinAmount *= 10;
-                message = `🔥 MEGA VITÓRIA! TELA CHEIA! Multiplicador 10x! Ganhou R$ ${totalWinAmount.toFixed(2)}!`;
-                isBigWin = true;
-            } else if (totalWinAmount > 0) { // Se não foi tela cheia, mas teve vitória
-                // Verifica se houve uma combinação de 3 tigres puros (linha 2)
-                if (finalGrid[0][1] === '🐯' && finalGrid[1][1] === '🐯' && finalGrid[2][1] === '🐯') {
-                    totalWinAmount = betAmount * 500; // Payout fixo para 3 tigres puros
-                    message = `🐅 TRÊS TIGRES! 🔥 MEGA BÔNUS DE R$ ${totalWinAmount.toFixed(2)}!`;
-                    isBigWin = true;
-                } else {
-                    message = `🎉 Vitória em ${winningLinesCount} linha(s)! Ganhou R$ ${totalWinAmount.toFixed(2)}!`;
-                }
-            } else {
-                message = "Que pena, não foi dessa vez!";
-                noWinSound.currentTime = 0;
-                noWinSound.play();
+                winningsDisplay.textContent = `SUPER VITÓRIA! ${referenceSymbol} - x10 Multiplicador!`;
             }
 
             if (totalWinAmount > 0) {
                 playerBalance += totalWinAmount;
-                if (isBigWin) {
+                updateBalanceDisplay();
+                if (!winningsDisplay.textContent.includes("SUPER VITÓRIA")) {
+                    winningsDisplay.textContent = `Você Ganhou: ${totalWinAmount.toFixed(2)} BRL!`;
+                } else {
+                     winningsDisplay.textContent += ` (+${totalWinAmount.toFixed(2)} BRL)`;
+                }
+                
+                // Tocar som de vitória
+                if (totalWinAmount >= (betAmount * 5)) { // Exemplo: Considerar "Big Win" se ganhar 5x a aposta
                     bigWinSound.currentTime = 0;
                     bigWinSound.play();
+                    triggerConfetti();
                 } else {
                     winSound.currentTime = 0;
                     winSound.play();
                 }
-                launchConfetti();
 
-                // Aplica o destaque visual nos símbolos vencedores
-                // Precisamos obter os elementos do DOM depois da rolagem ter se estabelecido
-                // pois eles foram recriados ou reposicionados.
-                setTimeout(() => { // Pequeno delay para garantir que o DOM esteja atualizado
-                    highlightSlots.forEach(posStr => {
-                        const [r, s] = posStr.split('-').map(Number);
-                        // reelInners[r] agora contém APENAS os 3 símbolos finais
-                        // então s (0, 1, 2) é o índice correto dentro do reelInner.children
-                        if (reelInners[r] && reelInners[r].children[s]) {
-                            reelInners[r].children[s].classList.add('winning-symbol');
-                        }
-                    });
-                }, 50); // Ajuste o delay conforme necessário
+                // Aplica destaque visual aos símbolos vencedores
+                highlightSlots.forEach(coords => {
+                    const [r, s] = coords.split('-').map(Number);
+                    // O `reelInners[r].children` são os elementos `symbol-slot`
+                    if (reelInners[r] && reelInners[r].children[s]) {
+                        reelInners[r].children[s].classList.add('winning-symbol');
+                    }
+                });
+            } else {
+                noWinSound.currentTime = 0;
+                noWinSound.play();
+                winningsDisplay.textContent = "Sem sorte desta vez...";
             }
-
-            winningsDisplay.textContent = message;
-            updateBalanceDisplay();
         }
 
-        // --- Efeitos Visuais (Confetti) ---
-        function launchConfetti() {
-            const colors = ['#f1c40f', '#e67e22', '#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#ffea00', '#00ffc8'];
-            for (let i = 0; i < 70; i++) {
+        // --- Confetti ---
+        function triggerConfetti() {
+            for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.classList.add('confetti');
                 confetti.style.left = `${Math.random() * 100}vw`;
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.animationDuration = `${Math.random() * 2 + 3}s`;
-                confetti.style.animationDelay = `${Math.random() * 0.8}s`;
-                confetti.style.width = `${Math.random() * 8 + 5}px`;
-                confetti.style.height = `${Math.random() * 8 + 5}px`;
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                confetti.style.transform = `scale(${Math.random() * 1.5 + 0.5})`; // Tamanhos variados
                 confettiContainer.appendChild(confetti);
 
+                // Remove o confetti após a animação para não sobrecarregar o DOM
                 confetti.addEventListener('animationend', () => {
                     confetti.remove();
                 });
@@ -885,55 +867,60 @@
         }
 
         function clearConfetti() {
-            confettiContainer.innerHTML = '';
+            confettiContainer.innerHTML = ''; // Remove todos os confettis existentes
         }
 
         // --- Auto Spin ---
         function startAutoSpin() {
             if (isSpinning) return;
-            const count = parseInt(autoSpinCountInput.value);
-            if (isNaN(count) || count <= 0) {
+            
+            remainingAutoSpins = parseInt(autoSpinCountInput.value);
+            if (isNaN(remainingAutoSpins) || remainingAutoSpins <= 0) {
                 alert("Por favor, insira um número válido de giros automáticos.");
                 return;
             }
-            remainingAutoSpins = count;
+
+            spinButton.disabled = true;
             startAutoSpinButton.style.display = 'none';
             stopAutoSpinButton.style.display = 'inline-block';
-            spinReels(); // Inicia o primeiro giro
+            betAmountInput.disabled = true;
+
+            // Inicia o primeiro giro
+            spinReels();
         }
 
         function stopAutoSpin() {
-            clearInterval(autoSpinInterval);
-            autoSpinInterval = null;
+            if (autoSpinInterval) {
+                clearTimeout(autoSpinInterval);
+                autoSpinInterval = null;
+            }
             remainingAutoSpins = 0;
+            spinButton.disabled = false;
             startAutoSpinButton.style.display = 'inline-block';
             stopAutoSpinButton.style.display = 'none';
-            spinButton.disabled = false;
             betAmountInput.disabled = false;
+            winningsDisplay.textContent += " (Auto-giro parado)";
         }
 
-        // --- Inicialização e Event Listeners ---
-        loadBalance();
-        updateBalanceDisplay();
-        updateBetDisplay();
-
-        betAmountInput.addEventListener('input', updateBetDisplay);
+        // --- Event Listeners e Inicialização ---
         betAmountInput.addEventListener('change', updateBetDisplay);
+        betAmountInput.addEventListener('keyup', updateBetDisplay); // Para atualizar em tempo real
 
         startAutoSpinButton.addEventListener('click', startAutoSpin);
         stopAutoSpinButton.addEventListener('click', stopAutoSpin);
 
-        // Pré-popula os rolos com símbolos iniciais para que não fiquem vazios
-        reelInners.forEach(reelInner => {
-            for(let i = 0; i < 3; i++) { // 3 símbolos para preencher a tela inicial
-                reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalance();
+            updateBalanceDisplay();
+            updateBetDisplay(); // Garante que o valor da aposta inicial seja exibido
 
-        spinSound.load();
-        winSound.load();
-        noWinSound.load();
-        bigWinSound.load();
+            // Inicializa os rolos com símbolos aleatórios para preencher a tela
+            reelInners.forEach(reelInner => {
+                for (let i = 0; i < 3; i++) { // Apenas 3 símbolos para a visualização inicial
+                    reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+                }
+            });
+        });
     </script>
 </body>
 </html>
