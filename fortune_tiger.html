@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortune Tiger 3x3</title>
+    <title>Fortune Tiger 3x3 - Rolagem</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,6 +15,8 @@
             --success-color: #2ecc71; /* Emerald Green */
             --danger-color: #e74c3c; /* Bright Red */
             --highlight-win: #3aff3a; /* Green for win highlight */
+            --symbol-size: 5.5em; /* Define um tamanho base para os símbolos */
+            --slot-height: 150px; /* Define a altura de cada slot */
         }
 
         body {
@@ -90,9 +92,9 @@
             font-size: 1.1em;
         }
         #balance-display { color: var(--success-color); }
-        #winnings-message { 
-            color: var(--primary-color); 
-            font-size: 1.5em; 
+        #winnings-message {
+            color: var(--primary-color);
+            font-size: 1.5em;
             min-height: 1.5em;
         }
         #bet-amount-display { color: var(--secondary-color); }
@@ -142,48 +144,45 @@
 
         .reel {
             width: 120px;
-            height: 450px; /* Increased height for 3 symbols */
+            height: calc(var(--slot-height) * 3); /* Height for 3 visible slots */
             background-color: #0d0d1a;
             border-radius: 10px;
             display: flex;
-            flex-direction: column; /* Stack symbols vertically */
-            justify-content: space-around; /* Distribute symbols */
+            flex-direction: column;
+            justify-content: flex-start; /* Alinha símbolos no topo */
             align-items: center;
-            overflow: hidden;
+            overflow: hidden; /* Crucial para a rolagem */
             position: relative;
             border: 3px solid #555;
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.4);
         }
+
+        .reel-inner {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            transition: transform 0s ease-out; /* Transição controlada por JS */
+        }
         
         .symbol-slot {
             width: 100%;
-            height: 150px; /* Each slot for a symbol */
+            height: var(--slot-height);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 5.5em;
-            position: relative; /* For spin animation */
-            overflow: hidden; /* Ensure symbols don't overflow their slot */
+            font-size: var(--symbol-size);
+            flex-shrink: 0; /* Impede que os slots encolham */
+            box-sizing: border-box;
+            /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); // Aplique no próprio símbolo para melhor efeito */
         }
 
-        /* Adjust symbol positioning within its slot for animation */
-        .symbol-slot .symbol {
-            position: absolute;
-            top: 0; 
-            left: 50%;
-            transform: translate(-50%, -100%); /* Start above */
-            opacity: 0;
+        .symbol {
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }
-        
-        .symbol-slot .spin-animation {
-            animation: spinSlot 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-        }
 
-        @keyframes spinSlot {
-            0% { transform: translate(-50%, -100%); opacity: 0; }
-            50% { transform: translate(-50%, 0%); opacity: 1; }
-            100% { transform: translate(-50%, 0%); opacity: 1; }
+        /* Animação de rolagem do rolo */
+        .reel-inner.spin-animation {
+            transition: transform var(--spin-duration) cubic-bezier(0.25, 0.1, 0.25, 1); /* Ajustar curva para parada suave */
         }
 
         .reel.stop-flash {
@@ -293,7 +292,7 @@
             justify-content: center;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
         }
-        
+
         .back-button {
             margin-top: 40px;
             padding: 12px 25px;
@@ -403,9 +402,9 @@
             .info-box { font-size: 1.1em; min-width: 100px; padding: 8px 15px; }
             .info-box span { font-size: 1em; }
             #slot-machine { padding: 15px; gap: 8px; }
-            .reel { width: 90px; height: 360px; border-width: 2px; } /* Adjust reel height for 3x3 */
-            .symbol-slot { height: 120px; } /* Adjust slot height */
-            .symbol-slot .symbol { font-size: 4em; }
+            .reel { width: 90px; height: calc(var(--slot-height) * 3 * 0.8); border-width: 2px; }
+            .symbol-slot { height: calc(var(--slot-height) * 0.8); }
+            .symbol { font-size: calc(var(--symbol-size) * 0.8); }
             #tiger-header { font-size: 4.5em; top: -90px; height: 100px; }
             #controls { flex-direction: column; gap: 10px; padding: 15px 20px; }
             #betAmountInput { width: 80px; padding: 10px; font-size: 1em; }
@@ -423,9 +422,9 @@
             .info-box { font-size: 0.9em; min-width: 80px; padding: 6px 10px; }
             .info-box span { font-size: 0.9em; }
             #slot-machine { padding: 10px; gap: 5px; }
-            .reel { width: 70px; height: 300px; border-width: 2px; } /* Adjust reel height for 3x3 */
-            .symbol-slot { height: 100px; } /* Adjust slot height */
-            .symbol-slot .symbol { font-size: 3em; }
+            .reel { width: 70px; height: calc(var(--slot-height) * 3 * 0.6); border-width: 2px; }
+            .symbol-slot { height: calc(var(--slot-height) * 0.6); }
+            .symbol { font-size: calc(var(--symbol-size) * 0.6); }
             #tiger-header { font-size: 3.5em; top: -70px; height: 80px; }
             #controls { gap: 8px; padding: 10px 15px; }
             #betAmountInput { width: 60px; padding: 8px; font-size: 0.9em; }
@@ -451,19 +450,16 @@
         <div id="slot-machine">
             <div id="tiger-header"><span>🐯</span></div>
             <div class="reel" id="reel1">
-                <div class="symbol-slot" id="reel1-slot1"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel1-slot2"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel1-slot3"><span class="symbol"></span></div>
+                <div class="reel-inner" id="reel1-inner">
+                    </div>
             </div>
             <div class="reel" id="reel2">
-                <div class="symbol-slot" id="reel2-slot1"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel2-slot2"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel2-slot3"><span class="symbol"></span></div>
+                <div class="reel-inner" id="reel2-inner">
+                    </div>
             </div>
             <div class="reel" id="reel3">
-                <div class="symbol-slot" id="reel3-slot1"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel3-slot2"><span class="symbol"></span></div>
-                <div class="symbol-slot" id="reel3-slot3"><span class="symbol"></span></div>
+                <div class="reel-inner" id="reel3-inner">
+                    </div>
             </div>
         </div>
 
@@ -496,11 +492,11 @@
             document.getElementById('reel2'),
             document.getElementById('reel3')
         ];
-        // Referências diretas aos slots de símbolo (9 no total)
-        const symbolSlots = [
-            [document.getElementById('reel1-slot1'), document.getElementById('reel1-slot2'), document.getElementById('reel1-slot3')],
-            [document.getElementById('reel2-slot1'), document.getElementById('reel2-slot2'), document.getElementById('reel2-slot3')],
-            [document.getElementById('reel3-slot1'), document.getElementById('reel3-slot2'), document.getElementById('reel3-slot3')]
+        // Adicionamos os elementos 'reel-inner' para a animação de rolagem
+        const reelInners = [
+            document.getElementById('reel1-inner'),
+            document.getElementById('reel2-inner'),
+            document.getElementById('reel3-inner')
         ];
 
         const currentBalanceDisplay = document.getElementById('currentBalance');
@@ -518,6 +514,10 @@
         let isSpinning = false;
         let autoSpinInterval = null;
         let remainingAutoSpins = 0;
+
+        // Altura de um slot para calcular a translação
+        const SLOT_HEIGHT = 150; // px (ajustar de acordo com o CSS --slot-height)
+        const SPIN_DURATION = 1.5; // segundos (duração da animação de giro)
 
         // Atualização dos símbolos e suas ponderações
         const weightedSymbols = [
@@ -576,10 +576,8 @@
         }
 
         function clearHighlights() {
-            symbolSlots.forEach(reel => {
-                reel.forEach(slot => {
-                    slot.classList.remove('winning-symbol');
-                });
+            document.querySelectorAll('.winning-symbol').forEach(el => {
+                el.classList.remove('winning-symbol');
             });
         }
 
@@ -614,53 +612,103 @@
             spinSound.currentTime = 0;
             spinSound.play();
 
-            const finalGrid = [[], [], []]; // Representa a grade 3x3 de símbolos
+            const finalGrid = [[], [], []]; // Representa a grade 3x3 de símbolos finais
 
-            // Gira cada rolo e seus 3 símbolos
-            for (let r = 0; r < 3; r++) { // Para cada rolo (reel)
-                const reelDelay = r * 200; // Atraso para cada rolo parar sequencialmente
-                setTimeout(() => {
-                    for (let s = 0; s < 3; s++) { // Para cada slot dentro do rolo
-                        const slot = symbolSlots[r][s].querySelector('.symbol');
-                        slot.classList.add('spin-animation');
-                        const symbol = getRandomSymbol();
-                        slot.textContent = symbol;
-                        finalGrid[r][s] = symbol; // Armazena o símbolo na grade final
-                    }
+            // Gira cada rolo
+            for (let r = 0; r < 3; r++) {
+                const reelInner = reelInners[r];
+                
+                // Resetar transição para criar a ilusão de loop infinito na rolagem
+                reelInner.style.transition = 'none';
+                // Adiciona alguns símbolos "dummy" no topo para a animação começar acima
+                let dummySymbols = '';
+                for (let i = 0; i < 5; i++) { // 5 símbolos acima para garantir rolagem suave
+                    dummySymbols += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+                }
+                reelInner.innerHTML = dummySymbols; // Limpa e adiciona símbolos dummy
+
+                // Os 3 símbolos finais que aparecerão na tela
+                const reelFinalSymbols = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
+                finalGrid[r] = reelFinalSymbols; // Armazena para verificação de ganho
+
+                // Adiciona os símbolos finais + alguns de 'loop'
+                let spinSymbolsHtml = '';
+                // Adiciona vários símbolos aleatórios para preencher a rolagem
+                for (let i = 0; i < 20; i++) { // Mais símbolos para uma rolagem longa
+                    spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+                }
+                // Adiciona os símbolos finais desejados no final da sequência
+                spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[0]}</span></div>`;
+                spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[1]}</span></div>`;
+                spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[2]}</span></div>`;
+                
+                reelInner.innerHTML += spinSymbolsHtml; // Adiciona a sequência de símbolos
+
+                // Calcula o quanto o rolo precisa mover para parar nos símbolos corretos
+                // O -3 é porque queremos que os 3 últimos símbolos que adicionamos fiquem visíveis nos 3 slots
+                const totalSymbolsInReelInner = 5 + 20 + 3; // 5 dummy + 20 spin + 3 finais
+                const distanceToMove = (totalSymbolsInReelInner - 3) * SLOT_HEIGHT; // Move até que os últimos 3 estejam no topo
+
+                // Ajusta o CSS para a duração da animação
+                reelInner.style.setProperty('--spin-duration', `${SPIN_DURATION + (r * 0.2)}s`); // Atraso na parada por rolo
+                
+                // Força o browser a renderizar o estado inicial antes da transição
+                reelInner.offsetHeight; 
+                reelInner.style.transition = ''; // Habilita a transição
+                reelInner.classList.add('spin-animation');
+                reelInner.style.transform = `translateY(-${distanceToMove}px)`;
+
+                // Listener para o fim da animação de cada rolo
+                reelInner.addEventListener('transitionend', function handler() {
+                    reelInner.classList.remove('spin-animation');
+                    reelInner.style.transition = 'none'; // Desabilita transição para o próximo giro
+                    // Limpa símbolos que rolaram para fora da vista e reposiciona
+                    reelInner.innerHTML = '';
+                    reelFinalSymbols.forEach(symbol => {
+                        reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${symbol}</span></div>`;
+                    });
+                    reelInner.style.transform = `translateY(0)`; // Reseta a posição para os símbolos finais
+
                     // Adiciona um flash ao parar o rolo
                     reelContainers[r].classList.add('stop-flash');
                     reelContainers[r].addEventListener('animationend', () => {
                         reelContainers[r].classList.remove('stop-flash');
                     }, { once: true });
-                }, reelDelay);
-            }
 
-            // Tempo total para todas as animações terminarem
-            setTimeout(() => {
-                symbolSlots.forEach(reel => reel.forEach(slot => slot.querySelector('.symbol').classList.remove('spin-animation')));
-                spinSound.pause();
-                checkWin(finalGrid, betAmount);
-                isSpinning = false;
-                spinButton.disabled = false;
-                startAutoSpinButton.disabled = false;
-                betAmountInput.disabled = false;
+                    // Remove o listener para evitar múltiplos disparos no próximo giro
+                    reelInner.removeEventListener('transitionend', handler);
 
-                if (autoSpinInterval && remainingAutoSpins > 0) {
-                    remainingAutoSpins--;
-                    if (remainingAutoSpins > 0) {
-                        winningsDisplay.textContent += ` (${remainingAutoSpins} giros restantes)`;
-                        setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
-                    } else {
-                        stopAutoSpin();
-                        winningsDisplay.textContent += " (Auto-giro concluído!)";
+                    // Verifica se todos os rolos pararam para chamar checkWin
+                    const allReelsStopped = reelInners.every(inner => !inner.classList.contains('spin-animation'));
+                    if (allReelsStopped) {
+                        spinSound.pause();
+                        checkWin(finalGrid, betAmount);
+                        isSpinning = false;
+                        spinButton.disabled = false;
+                        startAutoSpinButton.disabled = false;
+                        betAmountInput.disabled = false;
+
+                        if (autoSpinInterval && remainingAutoSpins > 0) {
+                            remainingAutoSpins--;
+                            if (remainingAutoSpins > 0) {
+                                winningsDisplay.textContent += ` (${remainingAutoSpins} giros restantes)`;
+                                setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
+                            } else {
+                                stopAutoSpin();
+                                winningsDisplay.textContent += " (Auto-giro concluído!)";
+                            }
+                        }
                     }
-                }
-            }, 1800); // Ajustado o tempo total para 3 rolos x 0.6s de animação + delay entre eles
+                });
+            }
         }
+
 
         // --- Lógica de Verificação de Ganhos (5 Linhas de Pagamento + Wild + Multiplicador 10x) ---
 
-        // Definindo as 5 linhas de pagamento (índices [rolo][slot])
+        // Definindo as 5 linhas de pagamento (índices [rolo][slot visível na tela])
+        // IMPORTANTE: Estes índices se referem aos símbolos VISÍVEIS na tela após a rolagem.
+        // A lógica de checkWin usará a `finalGrid` que já contém esses símbolos.
         const paylines = [
             // Horizontais
             [[0,0], [1,0], [2,0]], // Linha 1 (topo)
@@ -675,22 +723,40 @@
             let totalWinAmount = 0;
             let winningLinesCount = 0;
             let highlightSlots = new Set(); // Para evitar duplicar destaques
-            let fullScreenMatch = true; // Para verificar o multiplicador x10
 
-            // Armazena o símbolo do primeiro slot da grade para verificar o preenchimento de tela
-            const firstSymbolOnGrid = finalGrid[0][0]; 
-            // Verifica se todos os símbolos na grade são o mesmo (ou Wilds que o completam)
+            // Verifica o multiplicador x10 (tela cheia com o mesmo símbolo)
+            let fullScreenMatch = true;
+            // Pegamos o símbolo do meio da tela como referência para o "fill"
+            // Se houver wild no meio, pegamos um dos outros símbolos
+            let referenceSymbol = finalGrid[1][1];
+            if (referenceSymbol === '🐯') { // Se o do meio for wild, tenta encontrar outro símbolo não-wild
+                for(let r=0; r<3; r++) {
+                    for(let s=0; s<3; s++) {
+                        if (finalGrid[r][s] !== '🐯') {
+                            referenceSymbol = finalGrid[r][s];
+                            break;
+                        }
+                    }
+                    if (referenceSymbol !== '🐯') break;
+                }
+                if (referenceSymbol === '🐯') { // Se tudo for wild, é full screen de wild
+                    referenceSymbol = '🐯';
+                }
+            }
+
+
             for (let r = 0; r < 3; r++) {
                 for (let s = 0; s < 3; s++) {
                     const currentSymbol = finalGrid[r][s];
-                    // Se não for um wild E não for igual ao primeiro símbolo, não é full screen match
-                    if (currentSymbol !== '🐯' && currentSymbol !== firstSymbolOnGrid) {
+                    // Se não for wild E não for igual ao símbolo de referência, não é full screen match
+                    if (currentSymbol !== '🐯' && currentSymbol !== referenceSymbol) {
                         fullScreenMatch = false;
                         break;
                     }
                 }
                 if (!fullScreenMatch) break;
             }
+
 
             for (const line of paylines) {
                 const s1 = finalGrid[line[0][0]][line[0][1]];
@@ -699,10 +765,15 @@
 
                 let lineWinAmount = 0;
                 let isLineWin = false;
-                let actualWinningSymbol = '';
+                let actualWinningSymbol = ''; // O símbolo que realmente formou a linha (excluindo Wild se ele apenas completou)
 
                 // Lógica de combinação com Wild ('🐯')
-                if (s1 === s2 && (s1 === s3 || s3 === '🐯')) {
+                // Prioridade: 3 do mesmo > 2 do mesmo + Wild > 1 do mesmo + 2 Wilds
+                // Se s1, s2, s3 são todos Wilds, é uma combinação de Wild.
+                if (s1 === '🐯' && s2 === '🐯' && s3 === '🐯') {
+                    isLineWin = true;
+                    actualWinningSymbol = '🐯';
+                } else if (s1 === s2 && (s1 === s3 || s3 === '🐯')) {
                     isLineWin = true;
                     actualWinningSymbol = s1;
                 } else if (s1 === s3 && (s1 === s2 || s2 === '🐯')) {
@@ -711,44 +782,45 @@
                 } else if (s2 === s3 && (s2 === s1 || s1 === '🐯')) {
                     isLineWin = true;
                     actualWinningSymbol = s2;
-                } else if (s1 === '🐯' && s2 === '🐯' && s3 === '🐯') {
-                    isLineWin = true;
-                    actualWinningSymbol = '🐯';
                 }
+
 
                 if (isLineWin) {
                     let basePayoutMultiplier;
-                    if (actualWinningSymbol === '🐯' && !(s1 === '🐯' && s2 === '🐯' && s3 === '🐯')) {
-                        // Se o Wild completou, use o payout do símbolo não-wild
-                        const nonWildSymbol = [s1, s2, s3].find(sym => sym !== '🐯');
-                        basePayoutMultiplier = payouts[nonWildSymbol];
-                    } else {
-                        // Caso contrário, use o payout do símbolo diretamente (incluindo 3 wilds)
+                    if (actualWinningSymbol === '🐯') { // Se o símbolo vencedor é um Wild
+                        if (s1 === '🐯' && s2 === '🐯' && s3 === '🐯') {
+                            basePayoutMultiplier = payouts['🐯']; // 3 Wilds puros
+                        } else {
+                            // Wild está completando. Pega o payout do símbolo NÃO-WILD que foi combinado
+                            const nonWildSymbol = [s1, s2, s3].find(sym => sym !== '🐯');
+                            basePayoutMultiplier = payouts[nonWildSymbol];
+                        }
+                    } else { // Símbolo vencedor não é Wild
                         basePayoutMultiplier = payouts[actualWinningSymbol];
                     }
-                    
+
                     lineWinAmount = betAmount * basePayoutMultiplier;
                     totalWinAmount += lineWinAmount;
                     winningLinesCount++;
 
                     // Adiciona os slots vencedores para destaque
                     line.forEach(pos => {
-                        highlightSlots.add(`${pos[0]}-${pos[1]}`);
+                        highlightSlots.add(`${pos[0]}-${pos[1]}`); // Guarda rolo-slot
                     });
                 }
             }
-            
+
             let message = "";
             let isBigWin = false;
 
             // Multiplicador 10x para tela cheia
-            if (fullScreenMatch && winningLinesCount > 0) { // Garante que houve um ganho e a tela foi preenchida
+            if (fullScreenMatch && totalWinAmount > 0) { // Garante que houve um ganho e a tela foi preenchida
                 totalWinAmount *= 10;
                 message = `🔥 MEGA VITÓRIA! TELA CHEIA! Multiplicador 10x! Ganhou R$ ${totalWinAmount.toFixed(2)}!`;
                 isBigWin = true;
-            } else if (winningLinesCount > 0) {
-                 // Verifica se houve uma combinação de 3 tigres puros (que já aplica um payout alto)
-                if (finalGrid[0][1] === '🐯' && finalGrid[1][1] === '🐯' && finalGrid[2][1] === '🐯') { // Consideramos a linha do meio para 3 tigres puros como o principal jackpot
+            } else if (totalWinAmount > 0) { // Se não foi tela cheia, mas teve vitória
+                // Verifica se houve uma combinação de 3 tigres puros (linha 2)
+                if (finalGrid[0][1] === '🐯' && finalGrid[1][1] === '🐯' && finalGrid[2][1] === '🐯') {
                     totalWinAmount = betAmount * 500; // Payout fixo para 3 tigres puros
                     message = `🐅 TRÊS TIGRES! 🔥 MEGA BÔNUS DE R$ ${totalWinAmount.toFixed(2)}!`;
                     isBigWin = true;
@@ -771,11 +843,20 @@
                     winSound.play();
                 }
                 launchConfetti();
+
                 // Aplica o destaque visual nos símbolos vencedores
-                highlightSlots.forEach(posStr => {
-                    const [r, s] = posStr.split('-').map(Number);
-                    symbolSlots[r][s].classList.add('winning-symbol');
-                });
+                // Precisamos obter os elementos do DOM depois da rolagem ter se estabelecido
+                // pois eles foram recriados ou reposicionados.
+                setTimeout(() => { // Pequeno delay para garantir que o DOM esteja atualizado
+                    highlightSlots.forEach(posStr => {
+                        const [r, s] = posStr.split('-').map(Number);
+                        // reelInners[r] agora contém APENAS os 3 símbolos finais
+                        // então s (0, 1, 2) é o índice correto dentro do reelInner.children
+                        if (reelInners[r] && reelInners[r].children[s]) {
+                            reelInners[r].children[s].classList.add('winning-symbol');
+                        }
+                    });
+                }, 50); // Ajuste o delay conforme necessário
             }
 
             winningsDisplay.textContent = message;
@@ -807,6 +888,30 @@
             confettiContainer.innerHTML = '';
         }
 
+        // --- Auto Spin ---
+        function startAutoSpin() {
+            if (isSpinning) return;
+            const count = parseInt(autoSpinCountInput.value);
+            if (isNaN(count) || count <= 0) {
+                alert("Por favor, insira um número válido de giros automáticos.");
+                return;
+            }
+            remainingAutoSpins = count;
+            startAutoSpinButton.style.display = 'none';
+            stopAutoSpinButton.style.display = 'inline-block';
+            spinReels(); // Inicia o primeiro giro
+        }
+
+        function stopAutoSpin() {
+            clearInterval(autoSpinInterval);
+            autoSpinInterval = null;
+            remainingAutoSpins = 0;
+            startAutoSpinButton.style.display = 'inline-block';
+            stopAutoSpinButton.style.display = 'none';
+            spinButton.disabled = false;
+            betAmountInput.disabled = false;
+        }
+
         // --- Inicialização e Event Listeners ---
         loadBalance();
         updateBalanceDisplay();
@@ -817,6 +922,13 @@
 
         startAutoSpinButton.addEventListener('click', startAutoSpin);
         stopAutoSpinButton.addEventListener('click', stopAutoSpin);
+
+        // Pré-popula os rolos com símbolos iniciais para que não fiquem vazios
+        reelInners.forEach(reelInner => {
+            for(let i = 0; i < 3; i++) { // 3 símbolos para preencher a tela inicial
+                reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+            }
+        });
 
         spinSound.load();
         winSound.load();
