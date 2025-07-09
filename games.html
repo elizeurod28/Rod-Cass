@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino - Escolha seu Jogo</title>
+    <title>Casino Online</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
@@ -30,6 +30,149 @@
             letter-spacing: 3px;
         }
 
+        /* Estilos para a seção de Autenticação */
+        .auth-container {
+            background-color: #21213b;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            border: 5px solid #ff9800; /* Laranja para borda do container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 500px;
+            width: 95%;
+            position: relative;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auth-toggle button {
+            background-color: #3f51b5; /* Azul */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-toggle button:hover {
+            background-color: #536dfe;
+            transform: translateY(-2px);
+        }
+
+        .auth-toggle button.active {
+            background-color: #ffeb3b; /* Amarelo quando ativo */
+            color: #21213b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+            transform: scale(1.05);
+        }
+
+        .auth-form {
+            width: 100%;
+            display: none; /* Escondido por padrão, JavaScript vai mostrar */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form.active {
+            display: flex; /* Ativa o formulário */
+        }
+
+        .auth-form input[type="email"],
+        .auth-form input[type="password"] {
+            width: calc(100% - 24px); /* Ajusta para padding */
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #7f8c8d;
+            background-color: #34495e;
+            color: #ecf0f1;
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-form input:focus {
+            border-color: #ffeb3b;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 235, 59, 0.3);
+        }
+
+        .auth-form button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .auth-form button.login-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C); /* Verde */
+            border-bottom: 5px solid #1B5E20;
+        }
+        .auth-form button.login-btn:hover {
+            background: linear-gradient(145deg, #66BB6A, #4CAF50);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button.register-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9); /* Azul */
+            border-bottom: 5px solid #247bb2;
+        }
+        .auth-form button.register-btn:hover {
+            background: linear-gradient(145deg, #2980b9, #247bb2);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .auth-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message-display {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            transition: color 0.3s ease-out;
+        }
+        .message-display.error {
+            color: #e74c3c;
+        }
+        .message-display.success {
+            color: #2ecc71;
+        }
+        .message-display.info {
+            color: #3498db;
+        }
+
+        /* Estilos para a seção Logged In (Games) */
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -168,7 +311,7 @@
             font-size: 1em;
             transition: background-color 0.2s, transform 0.2s;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            border-bottom: 44px solid #1B5E20;
+            border-bottom: 4px solid #1B5E20; 
         }
 
         .game-card button:hover {
@@ -181,7 +324,6 @@
             border-bottom: 2px solid #1B5E20;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
-
 
         .controls {
             margin-top: 30px;
@@ -263,88 +405,155 @@
             .balance-label { font-size: 0.9em; }
             .balance-value { font-size: 1.5em; }
             .recharge-button { font-size: 0.8em; padding: 6px 12px; }
-            .game-selection-container { padding: 30px; gap: 20px; }
+            .game-selection-container, .auth-container { padding: 30px; gap: 20px; }
             .game-card { padding: 15px; }
             .game-card h2 { font-size: 1.2em; }
             .game-card p { font-size: 0.8em; }
             .game-card button { font-size: 0.9em; padding: 10px 15px; }
             .controls button { font-size: 1em; padding: 12px 20px; }
+            .auth-toggle button { padding: 10px 18px; font-size: 1em; }
+            .auth-form input { width: calc(100% - 20px); font-size: 1em; padding: 10px; }
+            .auth-form button { font-size: 1em; padding: 12px 20px; }
         }
     </style>
 </head>
 <body>
-    <h1>Escolha seu Jogo</h1>
+    <h1 id="mainTitle">Casino Online</h1>
 
-    <div class="header-content">
-        <div class="user-info">Bem-vindo(a), <span id="userEmailDisplay">Carregando...</span></div>
-        <div class="balance-area">
-            <span class="balance-label">Saldo:</span>
-            <span class="balance-value" id="userBalanceDisplay">0.00</span>
-            <button id="rechargeBtn" class="recharge-button">Recarregar (+100)</button>
+    <div class="auth-wrapper" id="authSection">
+        <div class="auth-container">
+            <div class="auth-toggle">
+                <button id="loginTab" class="active">Login</button>
+                <button id="registerTab">Registrar</button>
+            </div>
+
+            <form id="loginForm" class="auth-form active">
+                <input type="email" id="loginEmail" placeholder="E-mail" required>
+                <input type="password" id="loginPassword" placeholder="Senha" required>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+
+            <form id="registerForm" class="auth-form">
+                <input type="email" id="registerEmail" placeholder="E-mail" required>
+                <input type="password" id="registerPassword" placeholder="Senha" required>
+                <input type="password" id="confirmPassword" placeholder="Confirmar Senha" required>
+                <button type="submit" class="register-btn">Registrar</button>
+            </form>
+            
+            <div class="message-display" id="authMessage"></div>
         </div>
     </div>
 
-    <div id="loadingScreen" class="loading-spinner"></div>
-    
-    <div class="game-selection-container" id="gameList" style="display: none;">
-        <div class="game-card" data-game-url="ouble.html">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Blaze_Entertainment_Logo.svg/1200px-Blaze_Entertainment_Logo.svg.png" alt="Blaze Double Logo">
-            <h2>Blaze Double</h2>
-            <p>Aposte no vermelho, branco ou preto e veja o multiplicador girar!</p>
-            <button>Jogar Blaze Double</button>
+    <div id="gamesSection" style="display: none;">
+        <div class="header-content">
+            <div class="user-info">Bem-vindo(a), <span id="userEmailDisplay">Carregando...</span></div>
+            <div class="balance-area">
+                <span class="balance-label">Saldo:</span>
+                <span class="balance-value" id="userBalanceDisplay">0.00</span>
+                <button id="rechargeBtn" class="recharge-button">Recarregar (+100)</button>
+            </div>
         </div>
 
-        <div class="game-card" data-game-url="mines.html">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Mines_of_dalaran.png/640px-Mines_of_dalaran.png" alt="Mines Logo">
-            <h2>Mines</h2>
-            <p>Descubra as estrelas e evite as minas neste jogo de estratégia.</p>
-            <button>Jogar Mines</button>
-        </div>
+        <div id="loadingScreen" class="loading-spinner" style="display: none;"></div>
+        
+        <div class="game-selection-container" id="gameList">
+            <div class="game-card" data-game-url="games/double.html">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Blaze_Entertainment_Logo.svg/1200px-Blaze_Entertainment_Logo.svg.png" alt="Blaze Double Logo">
+                <h2>Blaze Double</h2>
+                <p>Aposte no vermelho, branco ou preto e veja o multiplicador girar!</p>
+                <button>Jogar Blaze Double</button>
+            </div>
 
-        </div>
+            <div class="game-card" data-game-url="games/mines.html">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Mines_of_dalaran.png/640px-Mines_of_dalaran.png" alt="Mines Logo">
+                <h2>Mines</h2>
+                <p>Descubra as estrelas e evite as minas neste jogo de estratégia.</p>
+                <button>Jogar Mines</button>
+            </div>
 
-    <div class="controls">
-        <button id="logoutBtn" class="logout-btn-game-page">Sair</button>
+            <div class="game-card" data-game-url="games/fortune-tiger.html">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR07fJ8X_wH50Y5k2n8w9p_s_eL4Q6p-vT-2A&s" alt="Fortune Tiger Logo"> <h2>Fortune Tiger</h2>
+                <p>Um jogo de slot vibrante com um tema asiático.</p>
+                <button>Jogar Fortune Tiger</button>
+            </div>
+
+            <div class="game-card" data-game-url="games/dice.html">
+                <img src="https://img.freepik.com/premium-photo/pair-dice-neon-light-table-generative-ai_973167-2708.jpg" alt="Dice Logo"> <h2>Dice</h2>
+                <p>Aposte no resultado do lançamento dos dados. Simples e divertido!</p>
+                <button>Jogar Dice</button>
+            </div>
+            
+            </div>
+
+        <div class="controls">
+            <button id="logoutBtn" class="logout-btn-game-page">Sair</button>
+        </div>
     </div>
 
     <script type="module">
         // Importa as funções necessárias do Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // Importa as funções do Firestore
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
         // SUA CONFIGURAÇÃO DO FIREBASE (COLE AQUI O OBJETO COPIADO DO CONSOLE DO FIREBASE)
         const firebaseConfig = {
-            apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0", // <-- Substitua este valor
-            authDomain: "minesr-c4cdd.firebaseapp.com", // <-- Substitua este valor
-            projectId: "minesr-c4cdd", // <-- Substitua este valor
-            storageBucket: "minesr-c4cdd.firebasestorage.appT",
-            messagingSenderId: "23212779178",
-            appId: "1:232127791789:web:b9de6157faabb44f357c2"
+          apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0",
+          authDomain: "minesr-c4cdd.firebaseapp.com",
+          projectId: "minesr-c4cdd",
+          storageBucket: "minesr-c4cdd.firebasestorage.app", // Correção aqui, removi o 'T' no final
+          messagingSenderId: "23212779178",
+          appId: "1:232127791789:web:b9de6157faabb44f357c2"
         };
 
         // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app); // Obtém a instância do Firestore
+        const db = getFirestore(app);
 
+        // Referências aos elementos HTML (login/registro)
+        const authSection = document.getElementById('authSection');
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authMessageDisplay = document.getElementById('authMessage');
+
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        // Referências aos elementos HTML (jogos)
+        const gamesSection = document.getElementById('gamesSection');
         const userEmailDisplay = document.getElementById('userEmailDisplay');
-        const userBalanceDisplay = document.getElementById('userBalanceDisplay'); // Novo elemento para o saldo
-        const rechargeBtn = document.getElementById('rechargeBtn'); // Novo botão de recarga
+        const userBalanceDisplay = document.getElementById('userBalanceDisplay');
+        const rechargeBtn = document.getElementById('rechargeBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const gameList = document.getElementById('gameList');
         const loadingScreen = document.getElementById('loadingScreen');
+        const mainTitle = document.getElementById('mainTitle');
 
         let currentUser = null; // Para armazenar o usuário logado
 
-        // Função para formatar o saldo para exibição
+        // Funções de utilidade
+        function displayAuthMessage(message, type = '') {
+            authMessageDisplay.textContent = message;
+            authMessageDisplay.className = 'message-display';
+            if (type) {
+                authMessageDisplay.classList.add(type);
+            }
+        }
+
         function formatBalance(balance) {
+            // Se o saldo for nulo, indefinido ou não um número, exibe 0.00 ou uma mensagem.
+            if (typeof balance !== 'number' || isNaN(balance)) {
+                return 'R$ 0,00'; // Ou "N/A" ou "Carregando..."
+            }
             return balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Função para carregar o saldo do Firestore
         async function loadUserBalance(userId) {
             const userRef = doc(db, "users", userId);
             try {
@@ -354,8 +563,9 @@
                     userBalanceDisplay.textContent = formatBalance(balance);
                     console.log(`Saldo do usuário ${userId} carregado: ${balance}`);
                 } else {
-                    console.log(`Documento de saldo para o usuário ${userId} não encontrado. Isso não deveria acontecer se o index.html estiver inicializando corretamente.`);
-                    userBalanceDisplay.textContent = formatBalance(0); // Mostra 0 se não encontrar
+                    console.log(`Documento de saldo para o usuário ${userId} não encontrado. O saldo será exibido como R$0,00.`);
+                    userBalanceDisplay.textContent = formatBalance(0); // Exibe 0 se não encontrar o documento
+                    alert("Seu saldo não foi encontrado. Por favor, recarregue para começar a jogar.");
                 }
             } catch (error) {
                 console.error("Erro ao carregar saldo do usuário:", error);
@@ -363,7 +573,112 @@
             }
         }
 
-        // Função para recarregar saldo (simulado)
+        // --- Lógica da Seção de Autenticação ---
+        function showAuthForm(formId) {
+            loginTab.classList.remove('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.remove('active');
+            registerForm.classList.remove('active');
+            displayAuthMessage('');
+
+            if (formId === 'login') {
+                loginTab.classList.add('active');
+                loginForm.classList.add('active');
+                mainTitle.textContent = "Casino Online - Login";
+            } else {
+                registerTab.classList.add('active');
+                registerForm.classList.add('active');
+                mainTitle.textContent = "Casino Online - Registrar";
+            }
+        }
+
+        loginTab.addEventListener('click', () => showAuthForm('login'));
+        registerTab.addEventListener('click', () => showAuthForm('register'));
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            displayAuthMessage("Tentando fazer login...", "info");
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged vai lidar com a transição para a seção de jogos
+            } catch (error) {
+                console.error("Erro de login:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao fazer login.";
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Sua conta foi desativada.';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = 'E-mail ou senha incorretos.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao fazer login. Verifique seu e-mail e senha.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                displayAuthMessage("As senhas não coincidem.", "error");
+                return;
+            }
+            if (password.length < 6) {
+                displayAuthMessage("A senha deve ter pelo menos 6 caracteres.", "error");
+                return;
+            }
+
+            displayAuthMessage("Tentando registrar...", "info");
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                // REMOVIDA A LINHA ABAIXO:
+                // await setDoc(doc(db, "users", user.uid), { balance: 1000.00 }); 
+                // Agora, o saldo precisa ser definido no Firebase via Cloud Functions ou manualmente.
+                console.log(`Usuário ${user.email} registrado. Saldo inicial DEVE ser definido via Firebase (Cloud Functions ou manual).`);
+
+                // onAuthStateChanged vai lidar com a transição para a seção de jogos
+                // O loadUserBalance tentará carregar o saldo e exibirá 0.00 se não encontrar.
+
+            } catch (error) {
+                console.error("Erro de registro:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao registrar.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está em uso.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'A senha é muito fraca. Escolha uma senha mais forte.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao registrar. Tente novamente.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        // --- Lógica da Seção de Jogos ---
         rechargeBtn.addEventListener('click', async () => {
             if (currentUser) {
                 const userId = currentUser.uid;
@@ -373,14 +688,17 @@
                     if (docSnap.exists()) {
                         let currentBalance = docSnap.data().balance;
                         const rechargeAmount = 100.00;
-                        currentBalance += rechargeAmount;
+                        currentBalance = (currentBalance || 0) + rechargeAmount; // Garante que currentBalance seja um número
 
                         await updateDoc(userRef, { balance: currentBalance });
                         userBalanceDisplay.textContent = formatBalance(currentBalance);
                         alert(`Saldo recarregado! Você adicionou ${formatBalance(rechargeAmount)}. Novo saldo: ${formatBalance(currentBalance)}`);
                         console.log(`Saldo do usuário ${userId} recarregado para: ${currentBalance}`);
                     } else {
-                        alert("Não foi possível encontrar seu saldo para recarregar.");
+                        // Se o documento não existe na hora da recarga, isso significa que não foi criado anteriormente.
+                        // Aqui você pode decidir: alertar o usuário ou criar com saldo de recarga.
+                        // Para manter a política de "não criar no cliente", apenas alertamos.
+                        alert("Não foi possível encontrar seu saldo para recarregar. Seu saldo pode não ter sido inicializado no Firebase. Por favor, contate o suporte.");
                     }
                 } catch (error) {
                     console.error("Erro ao recarregar saldo:", error);
@@ -391,59 +709,70 @@
             }
         });
 
-
-        // Função para redirecionar para a página de login se não estiver autenticado
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // Usuário está logado
-                currentUser = user; // Armazena o usuário logado
-                userEmailDisplay.textContent = user.email || user.displayName;
-                
-                // Carrega e exibe o saldo do usuário
-                await loadUserBalance(user.uid);
-
-                loadingScreen.style.display = 'none'; // Esconde o spinner
-                gameList.style.display = 'flex';      // Mostra a lista de jogos
-                console.log("Usuário logado na página de jogos:", user.email);
-            } else {
-                // Usuário NÃO está logado, redireciona para a página de login
-                console.log("Nenhum usuário logado. Redirecionando para a página de login.");
-                window.location.href = 'index.html';
-            }
-        });
-
-        // Event listener para o botão de logout
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                // Após o logout, onAuthStateChanged vai redirecionar para index.html
+                // onAuthStateChanged vai lidar com a transição de volta para a seção de autenticação
             } catch (error) {
                 console.error("Erro ao fazer logout:", error);
                 alert("Erro ao tentar sair. Tente novamente.");
             }
         });
 
-        // Adiciona event listeners para cada card de jogo
         document.querySelectorAll('.game-card').forEach(card => {
             card.addEventListener('click', () => {
                 const gameUrl = card.dataset.gameUrl;
                 if (gameUrl) {
-                    window.location.href = gameUrl;
+                    alert(`Redirecionando para ${card.querySelector('h2').textContent}... (Em uma aplicação real, o jogo carregaria aqui)`);
+                    window.location.href = gameUrl; 
                 }
             });
-            // Opcional: Adiciona listener ao botão dentro do card também
             const button = card.querySelector('button');
             if (button) {
                 button.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Evita que o clique no botão acione o clique do card
+                    e.stopPropagation();
                     const gameUrl = card.dataset.gameUrl;
                     if (gameUrl) {
+                        alert(`Redirecionando para ${card.querySelector('h2').textContent}... (Em uma aplicação real, o jogo carregaria aqui)`);
                         window.location.href = gameUrl;
                     }
                 });
             }
         });
 
+        // --- Gerenciamento de Estado de Autenticação (Central) ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                userEmailDisplay.textContent = user.email || user.displayName;
+                await loadUserBalance(user.uid); // Tenta carregar o saldo do Firestore
+
+                // Mostra a seção de jogos e esconde a de autenticação
+                authSection.style.display = 'none';
+                gamesSection.style.display = 'flex';
+                gamesSection.style.flexDirection = 'column'; // Garante que a seção de jogos seja flex column
+                mainTitle.textContent = "Escolha seu Jogo"; // Atualiza o título principal
+                loadingScreen.style.display = 'none'; // Esconde o spinner se estiver visível
+                gameList.style.display = 'flex'; // Garante que a lista de jogos esteja visível
+
+                console.log("Usuário logado e na seção de jogos:", user.email);
+
+            } else {
+                currentUser = null;
+                // Mostra a seção de autenticação e esconde a de jogos
+                gamesSection.style.display = 'none';
+                authSection.style.display = 'flex';
+                showAuthForm('login'); // Volta para a aba de login por padrão
+                mainTitle.textContent = "Casino Online"; // Volta o título para o padrão
+
+                console.log("Nenhum usuário logado. Exibindo seção de autenticação.");
+            }
+        });
+
+        // Pequena correção no firebaseConfig, removendo um 'T' extra no storageBucket que notei.
+        // Se o seu bucket não tiver um 'T' no final, essa correção é válida.
+        // storageBucket: "minesr-c4cdd.firebasestorage.appT",  // Original
+        // storageBucket: "minesr-c4cdd.firebasestorage.app", // Corrigido
     </script>
 </body>
 </html>

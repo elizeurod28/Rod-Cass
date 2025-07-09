@@ -172,41 +172,7 @@
         .or-divider::before { left: 0; }
         .or-divider::after { right: 0; }
 
-        .google-login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px 25px;
-            background-color: #dd4b39; /* Vermelho do Google */
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1.2em;
-            font-weight: bold;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-            transition: all 0.2s ease-out;
-            border-bottom: 5px solid #c0392b;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .google-login-btn img {
-            width: 24px;
-            height: 24px;
-        }
-
-        .google-login-btn:hover {
-            background-color: #e74c3c;
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
-        }
-        .google-login-btn:active {
-            transform: translateY(2px);
-            border-bottom: 2px solid #c0392b;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
+        /* As classes para o botão do Google foram removidas daqui */
 
         .message-display {
             margin-top: 20px;
@@ -281,7 +247,7 @@
         .go-to-games-btn { /* Novo botão */
             background: linear-gradient(145deg, #ffeb3b, #fbc02d); /* Amarelo */
             color: #21213b;
-            border-bottom: 5px solid #f9a825;
+            border-bottom: 5_px solid #f9a825;
         }
         .go-to-games-btn:hover {
             background: linear-gradient(145deg, #ffe082, #ffeb3b);
@@ -300,7 +266,7 @@
             .auth-toggle button { padding: 10px 18px; font-size: 1em; }
             .auth-form input { width: calc(100% - 20px); font-size: 1em; padding: 10px; }
             .auth-form button { font-size: 1em; padding: 12px 20px; }
-            .google-login-btn { font-size: 1em; padding: 12px 20px; }
+            /* .google-login-btn foi removido */
             .message-display { font-size: 1em; }
             .logged-in-message { font-size: 1.2em; }
             .logged-in-controls button { font-size: 1em; padding: 12px 20px; }
@@ -310,7 +276,8 @@
 <body>
     <h1>Casino Online</h1>
 
-    <div class="auth-wrapper"> <div class="auth-container" id="authSection">
+    <div class="auth-wrapper">
+        <div class="auth-container" id="authSection">
             <div class="auth-toggle">
                 <button id="loginTab" class="active">Login</button>
                 <button id="registerTab">Registrar</button>
@@ -329,13 +296,6 @@
                 <button type="submit" class="register-btn">Registrar</button>
             </form>
 
-            <div class="or-divider">OU</div>
-
-            <button id="googleLoginBtn" class="google-login-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_des_Google_G.svg" alt="Google Logo">
-                Entrar com Google
-            </button>
-            
             <div class="message-display" id="authMessage"></div>
         </div>
 
@@ -349,17 +309,17 @@
         </div>
     </div>
 
-
     <script type="module">
         // Importa as funções necessárias do Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // Removido GoogleAuthProvider e signInWithPopup
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         // SUA CONFIGURAÇÃO DO FIREBASE (COLE AQUI O OBJETO COPIADO DO CONSOLE DO FIREBASE)
         const firebaseConfig = {
-          apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0", // <-- Substitua este valor
-          authDomain: "minesr-c4cdd.firebaseapp.com", // <-- Substitua este valor
-          projectId: "minesr-c4cdd", // <-- Substitua este valor
+          apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0",
+          authDomain: "minesr-c4cdd.firebaseapp.com",
+          projectId: "minesr-c4cdd",
           storageBucket: "minesr-c4cdd.firebasestorage.appT",
           messagingSenderId: "23212779178",
           appId: "1:232127791789:web:b9de6157faabb44f357c2"
@@ -373,17 +333,17 @@
         const authSection = document.getElementById('authSection');
         const loggedInSection = document.getElementById('loggedInSection');
         const userEmailDisplay = document.getElementById('userEmailDisplay');
-        const goToGamesBtn = document.getElementById('goToGamesBtn'); // Novo botão
+        const goToGamesBtn = document.getElementById('goToGamesBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const loggedInMessageDisplay = document.getElementById('loggedInMessage'); // Mensagem para seção logada
-
+        const loggedInMessageDisplay = document.getElementById('loggedInMessage');
 
         const loginTab = document.getElementById('loginTab');
         const registerTab = document.getElementById('registerTab');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
-        const authMessageDisplay = document.getElementById('authMessage'); // Mensagem para seção de auth
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const authMessageDisplay = document.getElementById('authMessage');
+        // Removido a referência ao botão do Google Login
+        // const googleLoginBtn = document.getElementById('googleLoginBtn'); 
 
         const loginEmailInput = document.getElementById('loginEmail');
         const loginPasswordInput = document.getElementById('loginPassword');
@@ -441,7 +401,6 @@
                 const user = userCredential.user;
                 console.log("Usuário logado:", user.email);
                 displayAuthMessage(`Login bem-sucedido! Redirecionando para os jogos...`, "success");
-                // Redireciona para a página de jogos após login bem-sucedido
                 setTimeout(() => {
                     window.location.href = 'games.html'; // Redireciona para a nova página de seleção de jogos
                 }, 1500);
@@ -495,7 +454,7 @@
                 const user = userCredential.user;
                 console.log("Usuário registrado:", user.email);
                 displayAuthMessage("Registro bem-sucedido! Redirecionando para os jogos...", "success");
-                 setTimeout(() => {
+                setTimeout(() => {
                     window.location.href = 'games.html'; // Redireciona para a nova página de seleção de jogos
                 }, 1500);
 
@@ -520,7 +479,8 @@
             }
         });
 
-        // Event listener para o botão de Login com Google
+        // O bloco de Event listener para o botão de Login com Google foi removido daqui
+        /*
         googleLoginBtn.addEventListener('click', async () => {
             displayAuthMessage("Redirecionando para o login com Google...", "info");
             const provider = new GoogleAuthProvider();
@@ -531,7 +491,7 @@
                 console.log("Login com Google bem-sucedido:", user.displayName || user.email);
                 displayAuthMessage(`Bem-vindo, ${user.displayName || user.email}! Redirecionando para os jogos...`, "success");
                 setTimeout(() => {
-                    window.location.href = 'games.html'; // Redireciona para a nova página de seleção de jogos
+                    window.location.href = 'games.html';
                 }, 1500);
 
             } catch (error) {
@@ -545,6 +505,7 @@
                 displayAuthMessage(errorMessage, "error");
             }
         });
+        */
 
         // Event listener para o botão "Ir para os Jogos" na seção logada
         goToGamesBtn.addEventListener('click', () => {
@@ -555,14 +516,12 @@
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                displayAuthMessage("Você foi desconectado.", "info"); // Exibe mensagem na seção de login
-                // onAuthStateChanged cuidará de reexibir a seção de login/registro
+                displayAuthMessage("Você foi desconectado.", "info");
             } catch (error) {
                 console.error("Erro ao fazer logout:", error);
-                displayLoggedInMessage("Erro ao tentar sair. Tente novamente.", "error"); // Exibe mensagem na seção logada
+                displayLoggedInMessage("Erro ao tentar sair. Tente novamente.", "error");
             }
         });
-
 
         // Ouve mudanças no estado de autenticação
         onAuthStateChanged(auth, (user) => {
@@ -573,8 +532,6 @@
                 loggedInSection.style.display = 'flex'; // Mostra a seção de logado
                 displayAuthMessage(''); // Limpa mensagens da seção de login
                 console.log("Usuário logado:", user.email);
-                // Já redireciona para games.html se o usuário estiver logado e na página index.html
-                // mas só se não for a primeira vez que a página é carregada (para evitar loop em recargas)
                 if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
                     window.location.href = 'games.html';
                 }
@@ -585,17 +542,13 @@
                 loggedInSection.style.display = 'none'; // Esconde a seção de logado
                 displayLoggedInMessage(''); // Limpa mensagens da seção logada
                 console.log("Nenhum usuário logado.");
-                // As mensagens serão exibidas pelos handlers de login/registro/logout
             }
         });
 
         // Inicializa mostrando o formulário de login (se ninguém estiver logado)
         document.addEventListener('DOMContentLoaded', () => {
-            // A lógica de exibição inicial será tratada pelo onAuthStateChanged
-            // Assim que o Firebase carregar o estado da autenticação, a UI será ajustada.
-            showForm('login'); // Garante que a aba de login esteja ativa por padrão se não logado.
+            showForm('login');
         });
-
     </script>
 </body>
 </html>
