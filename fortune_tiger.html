@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortune Tiger Aprimorado</title>
+    <title>Fortune Tiger 3x3</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,10 +14,11 @@
             --text-color: #f0f0f0; /* Off-white */
             --success-color: #2ecc71; /* Emerald Green */
             --danger-color: #e74c3c; /* Bright Red */
+            --highlight-win: #3aff3a; /* Green for win highlight */
         }
 
         body {
-            font-family: 'Orbitron', sans-serif; /* Mais futurista, como em jogos */
+            font-family: 'Orbitron', sans-serif;
             background: linear-gradient(135deg, var(--bg-color), #0f0f1d);
             color: var(--text-color);
             display: flex;
@@ -33,7 +34,7 @@
         }
 
         h1 {
-            font-family: 'Luckiest Guy', cursive; /* Fonte mais "game" */
+            font-family: 'Luckiest Guy', cursive;
             color: var(--primary-color);
             margin-bottom: 25px;
             font-size: 3.5em;
@@ -48,7 +49,7 @@
         }
 
         #game-container {
-            background: linear-gradient(180deg, #3a0050, #2b003d); /* Fundo sutil para o container principal */
+            background: linear-gradient(180deg, #3a0050, #2b003d);
             border: 8px solid var(--primary-color);
             border-radius: 25px;
             padding: 30px;
@@ -92,93 +93,116 @@
         #winnings-message { 
             color: var(--primary-color); 
             font-size: 1.5em; 
-            min-height: 1.5em; /* Para evitar saltos de layout */
+            min-height: 1.5em;
         }
         #bet-amount-display { color: var(--secondary-color); }
 
 
         #slot-machine {
             display: flex;
-            gap: 10px; /* Reduzi o gap para ficarem mais próximos */
-            background-color: #0f0f1d; /* Fundo mais escuro para a área dos rolos */
+            gap: 10px;
+            background-color: #0f0f1d;
             padding: 20px;
             border-radius: 15px;
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 5px 15px rgba(0, 0, 0, 0.5);
-            border: 4px solid var(--accent-color); /* Borda mais discreta */
+            border: 4px solid var(--accent-color);
             position: relative;
-            z-index: 2; /* Acima do tiger-header */
+            z-index: 2;
             overflow: hidden;
         }
 
         #tiger-header {
             position: absolute;
-            top: -110px; /* Ajustar para posicionar o tigre BEM acima dos rolos */
-            width: calc(100% + 60px); /* Para cobrir um pouco as bordas laterais do slot-machine */
+            top: -110px;
+            width: calc(100% + 60px);
             left: -30px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 6em; /* Tamanho ENORME para o emoji do tigre */
+            font-size: 6em;
             padding: 20px 0;
-            background: linear-gradient(to top, var(--accent-color), #7f0088); /* Gradiente roxo */
+            background: linear-gradient(to top, var(--accent-color), #7f0088);
             border-radius: 20px 20px 0 0;
             box-shadow: inset 0 -8px 20px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
-            height: 120px; /* Altura do cabeçalho */
+            height: 120px;
             box-sizing: border-box;
-            z-index: 0; /* Para ficar por trás dos rolos */
+            z-index: 0;
             border-bottom: 5px solid var(--primary-color);
         }
         #tiger-header span {
             animation: bounceTiger 2s infinite ease-in-out;
-            color: #f39c12; /* Cor do tigre mais vibrante */
+            color: #f39c12;
             text-shadow: 0 0 15px rgba(255, 140, 0, 0.8), 0 0 25px rgba(255, 140, 0, 0.6);
         }
 
         @keyframes bounceTiger {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); } /* Aumentei o pulo */
+            50% { transform: translateY(-15px); }
         }
 
         .reel {
-            width: 120px; /* Rolos mais largos */
-            height: 150px; /* Rolos mais altos */
-            background-color: #0d0d1a; /* Fundo do rolo ainda mais escuro */
+            width: 120px;
+            height: 450px; /* Increased height for 3 symbols */
+            background-color: #0d0d1a;
             border-radius: 10px;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Stack symbols vertically */
+            justify-content: space-around; /* Distribute symbols */
             align-items: center;
             overflow: hidden;
             position: relative;
-            border: 3px solid #555; /* Borda dos rolos */
+            border: 3px solid #555;
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.4);
         }
         
-        .symbol {
-            font-size: 5.5em; /* Símbolos maiores */
-            position: absolute;
-            top: 0; /* Inicia no topo para animação */
-            left: 50%;
-            transform: translate(-50%, -100%); /* Escondido acima do reel */
-            opacity: 0;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); /* Pequeno brilho nos símbolos */
-        }
-        
-        .spin-animation {
-            animation: spinReel 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        .symbol-slot {
+            width: 100%;
+            height: 150px; /* Each slot for a symbol */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5.5em;
+            position: relative; /* For spin animation */
+            overflow: hidden; /* Ensure symbols don't overflow their slot */
         }
 
-        @keyframes spinReel {
-            0% { transform: translate(-50%, -100%); opacity: 0; }
-            50% { transform: translate(-50%, 0%); opacity: 1; } /* Meio do caminho, visível */
-            100% { transform: translate(-50%, 0%); opacity: 1; } /* Para na posição final */
+        /* Adjust symbol positioning within its slot for animation */
+        .symbol-slot .symbol {
+            position: absolute;
+            top: 0; 
+            left: 50%;
+            transform: translate(-50%, -100%); /* Start above */
+            opacity: 0;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }
-        /* Efeito de flash ao parar para dar a sensação de parada */
+        
+        .symbol-slot .spin-animation {
+            animation: spinSlot 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        @keyframes spinSlot {
+            0% { transform: translate(-50%, -100%); opacity: 0; }
+            50% { transform: translate(-50%, 0%); opacity: 1; }
+            100% { transform: translate(-50%, 0%); opacity: 1; }
+        }
+
         .reel.stop-flash {
             animation: stopFlash 0.1s ease-out;
         }
         @keyframes stopFlash {
             0% { filter: brightness(2); }
             100% { filter: brightness(1); }
+        }
+
+        /* Highlight for winning symbols */
+        .symbol-slot.winning-symbol {
+            animation: winHighlight 0.5s infinite alternate;
+            box-shadow: 0 0 20px var(--highlight-win), inset 0 0 15px var(--highlight-win);
+            border-radius: 5px;
+        }
+        @keyframes winHighlight {
+            0% { background-color: transparent; }
+            100% { background-color: rgba(58, 255, 58, 0.3); }
         }
 
 
@@ -228,7 +252,7 @@
             background: linear-gradient(to bottom, var(--secondary-color), #a83100);
             color: white;
             box-shadow: 0 6px 15px rgba(255, 69, 0, 0.6);
-            border: 3px solid #ffaa00; /* Borda laranja */
+            border: 3px solid #ffaa00;
             animation: glowSpinButton 1.5s infinite alternate;
         }
 
@@ -273,7 +297,7 @@
         .back-button {
             margin-top: 40px;
             padding: 12px 25px;
-            background-color: #3498db; /* Azul */
+            background-color: #3498db;
             color: white;
             border: none;
             border-radius: 8px;
@@ -306,7 +330,7 @@
             position: absolute;
             width: 10px;
             height: 10px;
-            background-color: #f1c40f; /* Amarelo */
+            background-color: #f1c40f;
             border-radius: 50%;
             opacity: 0;
             animation: fall 3s ease-out forwards;
@@ -323,6 +347,55 @@
             }
         }
 
+        /* Auto Spin Controls */
+        #autoSpinControls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #autoSpinCount {
+            width: 60px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--primary-color);
+            background-color: #2a2a40;
+            color: var(--text-color);
+            text-align: center;
+            font-size: 1em;
+        }
+
+        #startAutoSpin, #stopAutoSpin {
+            padding: 8px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        #startAutoSpin {
+            background-color: #28a745;
+            color: white;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+        }
+        #startAutoSpin:hover { background-color: #218838; transform: translateY(-1px); }
+        #startAutoSpin:active { transform: translateY(1px); }
+
+        #stopAutoSpin {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+            display: none;
+        }
+        #stopAutoSpin:hover { background-color: #c82333; transform: translateY(-1px); }
+        #stopAutoSpin:active { transform: translateY(1px); }
+
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             h1 { font-size: 2.8em; margin-bottom: 20px; }
@@ -330,14 +403,18 @@
             .info-box { font-size: 1.1em; min-width: 100px; padding: 8px 15px; }
             .info-box span { font-size: 1em; }
             #slot-machine { padding: 15px; gap: 8px; }
-            .reel { width: 90px; height: 120px; border-width: 2px; }
-            .symbol { font-size: 4em; }
+            .reel { width: 90px; height: 360px; border-width: 2px; } /* Adjust reel height for 3x3 */
+            .symbol-slot { height: 120px; } /* Adjust slot height */
+            .symbol-slot .symbol { font-size: 4em; }
             #tiger-header { font-size: 4.5em; top: -90px; height: 100px; }
             #controls { flex-direction: column; gap: 10px; padding: 15px 20px; }
             #betAmountInput { width: 80px; padding: 10px; font-size: 1em; }
             button { padding: 12px 30px; font-size: 1.2em; }
             #winningsDisplay { font-size: 1.5em; margin-top: 20px; }
             .back-button { margin-top: 30px; font-size: 0.9em; }
+            #autoSpinControls { flex-direction: column; gap: 8px; padding: 8px 15px; }
+            #autoSpinCount { width: 50px; padding: 6px; font-size: 0.9em; }
+            #startAutoSpin, #stopAutoSpin { padding: 6px 12px; font-size: 0.9em; }
         }
 
         @media (max-width: 480px) {
@@ -346,8 +423,9 @@
             .info-box { font-size: 0.9em; min-width: 80px; padding: 6px 10px; }
             .info-box span { font-size: 0.9em; }
             #slot-machine { padding: 10px; gap: 5px; }
-            .reel { width: 70px; height: 100px; border-width: 2px; }
-            .symbol { font-size: 3em; }
+            .reel { width: 70px; height: 300px; border-width: 2px; } /* Adjust reel height for 3x3 */
+            .symbol-slot { height: 100px; } /* Adjust slot height */
+            .symbol-slot .symbol { font-size: 3em; }
             #tiger-header { font-size: 3.5em; top: -70px; height: 80px; }
             #controls { gap: 8px; padding: 10px 15px; }
             #betAmountInput { width: 60px; padding: 8px; font-size: 0.9em; }
@@ -358,7 +436,7 @@
     </style>
 </head>
 <body>
-    <h1>Fortune Tiger</h1>
+    <h1>Fortune Tiger 3x3</h1>
 
     <div id="game-container">
         <div id="game-info-panel">
@@ -372,9 +450,21 @@
 
         <div id="slot-machine">
             <div id="tiger-header"><span>🐯</span></div>
-            <div class="reel" id="reel1"><span class="symbol"></span></div>
-            <div class="reel" id="reel2"><span class="symbol"></span></div>
-            <div class="reel" id="reel3"><span class="symbol"></span></div>
+            <div class="reel" id="reel1">
+                <div class="symbol-slot" id="reel1-slot1"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel1-slot2"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel1-slot3"><span class="symbol"></span></div>
+            </div>
+            <div class="reel" id="reel2">
+                <div class="symbol-slot" id="reel2-slot1"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel2-slot2"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel2-slot3"><span class="symbol"></span></div>
+            </div>
+            <div class="reel" id="reel3">
+                <div class="symbol-slot" id="reel3-slot1"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel3-slot2"><span class="symbol"></span></div>
+                <div class="symbol-slot" id="reel3-slot3"><span class="symbol"></span></div>
+            </div>
         </div>
 
         <div id="controls">
@@ -385,6 +475,13 @@
             <button id="spinButton" onclick="spinReels()">Girar</button>
         </div>
 
+        <div id="autoSpinControls">
+            <label for="autoSpinCount">Giros Automáticos:</label>
+            <input type="number" id="autoSpinCount" min="1" value="10">
+            <button id="startAutoSpin">Iniciar Auto</button>
+            <button id="stopAutoSpin">Parar Auto</button>
+        </div>
+
         <div class="info-box" id="winningsDisplay"></div>
     </div>
 
@@ -393,54 +490,64 @@
     <div id="confetti-container"></div>
 
     <script>
-        const reels = [
-            document.getElementById('reel1').querySelector('.symbol'),
-            document.getElementById('reel2').querySelector('.symbol'),
-            document.getElementById('reel3').querySelector('.symbol')
-        ];
-        const reelContainers = [ // Adicionado para aplicar a animação de flash nos containers
+        // Seletores de elementos DOM
+        const reelContainers = [
             document.getElementById('reel1'),
             document.getElementById('reel2'),
             document.getElementById('reel3')
         ];
+        // Referências diretas aos slots de símbolo (9 no total)
+        const symbolSlots = [
+            [document.getElementById('reel1-slot1'), document.getElementById('reel1-slot2'), document.getElementById('reel1-slot3')],
+            [document.getElementById('reel2-slot1'), document.getElementById('reel2-slot2'), document.getElementById('reel2-slot3')],
+            [document.getElementById('reel3-slot1'), document.getElementById('reel3-slot2'), document.getElementById('reel3-slot3')]
+        ];
+
         const currentBalanceDisplay = document.getElementById('currentBalance');
         const betAmountInput = document.getElementById('betAmountInput');
-        const currentBetDisplay = document.getElementById('currentBetDisplay'); // Novo display para a aposta atual
+        const currentBetDisplay = document.getElementById('currentBetDisplay');
         const spinButton = document.getElementById('spinButton');
         const winningsDisplay = document.getElementById('winningsDisplay');
         const confettiContainer = document.getElementById('confetti-container');
 
+        const autoSpinCountInput = document.getElementById('autoSpinCount');
+        const startAutoSpinButton = document.getElementById('startAutoSpin');
+        const stopAutoSpinButton = document.getElementById('stopAutoSpin');
+
         let playerBalance = 0;
         let isSpinning = false;
+        let autoSpinInterval = null;
+        let remainingAutoSpins = 0;
 
+        // Atualização dos símbolos e suas ponderações
         const weightedSymbols = [
-            '🍊', '🍊', '🍊', '🍊', '🍊',
-            '🍋', '🍋', '🍋', '🍋',
-            '🍇', '🍇', '🍇',
-            '🧧', '🧧',
-            '🧨', '🧨',
-            '💰',
-            '👑',
-            '🐯'
+            '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', // Laranja (muito comum)
+            '🧨', '🧨', '🧨', '🧨', '🧨', '🧨', // Fogos de artifício (comum)
+            '🧧', '🧧', '🧧', '🧧', '🧧', // Envelopes (médio)
+            '💰', '💰', '💰', '💰', // Saco de moedas (médio-raro)
+            '👑', '👑', '👑', // Amuleto da sorte (raro)
+            '💎', '💎', // Lingote de ouro (muito raro)
+            '🐯' // Tigre (Wild - extremamente raro, mas valioso)
         ];
 
+        // Mapeamento de payouts baseado na sua descrição
         const payouts = {
-            '🍊': 2,
-            '🍋': 3,
-            '🍇': 5,
-            '🧧': 8,
-            '🧨': 10,
-            '💰': 20,
-            '👑': 50,
-            '🐯': 100 // O tigre (Wild) com o maior pagamento direto
+            '🍊': 0.3,         // Laranja
+            '🧨': 0.5,         // Fogos de artifício
+            '🧧': 0.8,         // Envelopes
+            '💰': 1,           // Saco de moedas
+            '👑': 2.5,         // Amuleto da sorte
+            '💎': 10,          // Lingote de ouro
+            '🐯': 25           // Tigre (Wild)
         };
 
-        // Sound effects (você precisará desses arquivos na mesma pasta)
+        // Sound effects (assegure-se de que esses arquivos estão na mesma pasta)
         const spinSound = new Audio('slot_spin.mp3');
         const winSound = new Audio('slot_win.mp3');
         const noWinSound = new Audio('slot_no_win.mp3');
         const bigWinSound = new Audio('slot_big_win.mp3');
 
+        // --- Gerenciamento de Saldo ---
         function saveBalance() {
             localStorage.setItem('minesPlayerBalance', playerBalance.toFixed(2));
         }
@@ -459,15 +566,24 @@
             saveBalance();
         }
 
-        // Atualiza o display da aposta atual
         function updateBetDisplay() {
             currentBetDisplay.textContent = parseFloat(betAmountInput.value).toFixed(2);
         }
 
+        // --- Lógica de Símbolos ---
         function getRandomSymbol() {
             return weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
         }
 
+        function clearHighlights() {
+            symbolSlots.forEach(reel => {
+                reel.forEach(slot => {
+                    slot.classList.remove('winning-symbol');
+                });
+            });
+        }
+
+        // --- Lógica de Giro ---
         async function spinReels() {
             if (isSpinning) return;
 
@@ -475,18 +591,22 @@
 
             if (isNaN(betAmount) || betAmount <= 0) {
                 alert("Por favor, insira um valor de aposta válido.");
+                stopAutoSpin();
                 return;
             }
             if (betAmount > playerBalance) {
                 alert(`Saldo insuficiente! Você tem R$ ${playerBalance.toFixed(2)}.`);
+                stopAutoSpin();
                 return;
             }
 
             isSpinning = true;
             spinButton.disabled = true;
             betAmountInput.disabled = true;
+            startAutoSpinButton.disabled = true;
             winningsDisplay.textContent = "";
             clearConfetti();
+            clearHighlights(); // Limpa destaques de vitória anterior
 
             playerBalance -= betAmount;
             updateBalanceDisplay();
@@ -494,95 +614,155 @@
             spinSound.currentTime = 0;
             spinSound.play();
 
-            const finalSymbols = [];
-            for (let i = 0; i < 3; i++) {
-                const delay = i * 200; // Aumentei o delay para um efeito de parada mais sequencial
-                setTimeout(() => {
-                    reels[i].classList.add('spin-animation');
-                    const symbol = getRandomSymbol();
-                    reels[i].textContent = symbol;
-                    finalSymbols[i] = symbol;
-                    
-                    // Adiciona um flash ao parar o rolo
-                    reelContainers[i].classList.add('stop-flash');
-                    reelContainers[i].addEventListener('animationend', () => {
-                        reelContainers[i].classList.remove('stop-flash');
-                    }, { once: true });
+            const finalGrid = [[], [], []]; // Representa a grade 3x3 de símbolos
 
-                }, delay);
+            // Gira cada rolo e seus 3 símbolos
+            for (let r = 0; r < 3; r++) { // Para cada rolo (reel)
+                const reelDelay = r * 200; // Atraso para cada rolo parar sequencialmente
+                setTimeout(() => {
+                    for (let s = 0; s < 3; s++) { // Para cada slot dentro do rolo
+                        const slot = symbolSlots[r][s].querySelector('.symbol');
+                        slot.classList.add('spin-animation');
+                        const symbol = getRandomSymbol();
+                        slot.textContent = symbol;
+                        finalGrid[r][s] = symbol; // Armazena o símbolo na grade final
+                    }
+                    // Adiciona um flash ao parar o rolo
+                    reelContainers[r].classList.add('stop-flash');
+                    reelContainers[r].addEventListener('animationend', () => {
+                        reelContainers[r].classList.remove('stop-flash');
+                    }, { once: true });
+                }, reelDelay);
             }
 
+            // Tempo total para todas as animações terminarem
             setTimeout(() => {
-                reels.forEach(reel => reel.classList.remove('spin-animation'));
+                symbolSlots.forEach(reel => reel.forEach(slot => slot.querySelector('.symbol').classList.remove('spin-animation')));
                 spinSound.pause();
-                checkWin(finalSymbols, betAmount);
+                checkWin(finalGrid, betAmount);
                 isSpinning = false;
                 spinButton.disabled = false;
+                startAutoSpinButton.disabled = false;
                 betAmountInput.disabled = false;
-            }, 1200); // Aumentei o tempo total para a animação e parada dos rolos
-        }
 
-        function checkWin(resultSymbols, betAmount) {
-            let winAmount = 0;
-            let message = "Que pena, não foi dessa vez!";
-            let isWinningSpin = false;
-            let isBigWin = false;
-
-            // Lógica para 3 símbolos iguais, incluindo o Wild ('🐯')
-            let matchType = ''; // 'exact', 'wild'
-
-            if (resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
-                matchType = 'exact'; // Ex: 🍊🍊🍊 ou 🐯🐯🐯
-            } else if (
-                (resultSymbols[0] === '🐯' && resultSymbols[1] === resultSymbols[2]) || // 🐯🍊🍊
-                (resultSymbols[1] === '🐯' && resultSymbols[0] === resultSymbols[2]) || // 🍊🐯🍊
-                (resultSymbols[2] === '🐯' && resultSymbols[0] === resultSymbols[1])   // 🍊🍊🐯
-            ) {
-                matchType = 'wild';
-            } else if (resultSymbols.filter(s => s === '🐯').length >= 2) { // Dois ou três tigres
-                 matchType = 'wild-only'; // Ex: 🐯🐯🍊, 🐯🍊🐯, 🍊🐯🐯, 🐯🐯🐯 (já coberto pelo exact)
-            }
-
-
-            if (matchType) {
-                let actualWinningSymbol = '';
-                if (matchType === 'exact') {
-                    actualWinningSymbol = resultSymbols[0];
-                } else if (matchType === 'wild' || matchType === 'wild-only') {
-                    // Encontra o símbolo que não é o tigre para determinar o payout, se houver
-                    const nonWildSymbols = resultSymbols.filter(s => s !== '🐯');
-                    if (nonWildSymbols.length > 0) {
-                        actualWinningSymbol = nonWildSymbols[0];
-                    } else { // Caso todos sejam tigres (já coberto pelo exact, mas reforçando)
-                        actualWinningSymbol = '🐯';
+                if (autoSpinInterval && remainingAutoSpins > 0) {
+                    remainingAutoSpins--;
+                    if (remainingAutoSpins > 0) {
+                        winningsDisplay.textContent += ` (${remainingAutoSpins} giros restantes)`;
+                        setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
+                    } else {
+                        stopAutoSpin();
+                        winningsDisplay.textContent += " (Auto-giro concluído!)";
                     }
                 }
-                
-                // Se três tigres exatos
-                if (resultSymbols[0] === '🐯' && resultSymbols[1] === '🐯' && resultSymbols[2] === '🐯') {
-                    winAmount = betAmount * 500;
-                    message = `🐅 TRÊS TIGRES! 🔥 MEGA BÔNUS DE R$ ${winAmount.toFixed(2)}!`;
-                    isBigWin = true;
-                    isWinningSpin = true;
-                } 
-                // Se há combinação com Wild ou 3 iguais (não tigres)
-                else if (payouts[actualWinningSymbol]) {
-                    winAmount = betAmount * payouts[actualWinningSymbol];
-                    message = `🎉 Vitória! Ganhou R$ ${winAmount.toFixed(2)}!`;
-                    isWinningSpin = true;
-                }
+            }, 1800); // Ajustado o tempo total para 3 rolos x 0.6s de animação + delay entre eles
+        }
 
-                // O recurso "Tigre da Sorte" (multiplicador x10) para qualquer 3 símbolos iguais (não tigres)
-                if (matchType === 'exact' && actualWinningSymbol !== '🐯') {
-                    winAmount *= 10;
-                    message = `🔥 MEGA VITÓRIA! ${actualWinningSymbol}${actualWinningSymbol}${actualWinningSymbol} - Multiplicador 10x! Ganhou R$ ${winAmount.toFixed(2)}!`;
-                    isBigWin = true;
+        // --- Lógica de Verificação de Ganhos (5 Linhas de Pagamento + Wild + Multiplicador 10x) ---
+
+        // Definindo as 5 linhas de pagamento (índices [rolo][slot])
+        const paylines = [
+            // Horizontais
+            [[0,0], [1,0], [2,0]], // Linha 1 (topo)
+            [[0,1], [1,1], [2,1]], // Linha 2 (meio)
+            [[0,2], [1,2], [2,2]], // Linha 3 (base)
+            // Diagonais
+            [[0,0], [1,1], [2,2]], // Linha 4 (diagonal principal)
+            [[0,2], [1,1], [2,0]]  // Linha 5 (diagonal secundária)
+        ];
+
+        function checkWin(finalGrid, betAmount) {
+            let totalWinAmount = 0;
+            let winningLinesCount = 0;
+            let highlightSlots = new Set(); // Para evitar duplicar destaques
+            let fullScreenMatch = true; // Para verificar o multiplicador x10
+
+            // Armazena o símbolo do primeiro slot da grade para verificar o preenchimento de tela
+            const firstSymbolOnGrid = finalGrid[0][0]; 
+            // Verifica se todos os símbolos na grade são o mesmo (ou Wilds que o completam)
+            for (let r = 0; r < 3; r++) {
+                for (let s = 0; s < 3; s++) {
+                    const currentSymbol = finalGrid[r][s];
+                    // Se não for um wild E não for igual ao primeiro símbolo, não é full screen match
+                    if (currentSymbol !== '🐯' && currentSymbol !== firstSymbolOnGrid) {
+                        fullScreenMatch = false;
+                        break;
+                    }
                 }
+                if (!fullScreenMatch) break;
             }
 
+            for (const line of paylines) {
+                const s1 = finalGrid[line[0][0]][line[0][1]];
+                const s2 = finalGrid[line[1][0]][line[1][1]];
+                const s3 = finalGrid[line[2][0]][line[2][1]];
 
-            if (isWinningSpin) {
-                playerBalance += winAmount;
+                let lineWinAmount = 0;
+                let isLineWin = false;
+                let actualWinningSymbol = '';
+
+                // Lógica de combinação com Wild ('🐯')
+                if (s1 === s2 && (s1 === s3 || s3 === '🐯')) {
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                } else if (s1 === s3 && (s1 === s2 || s2 === '🐯')) {
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                } else if (s2 === s3 && (s2 === s1 || s1 === '🐯')) {
+                    isLineWin = true;
+                    actualWinningSymbol = s2;
+                } else if (s1 === '🐯' && s2 === '🐯' && s3 === '🐯') {
+                    isLineWin = true;
+                    actualWinningSymbol = '🐯';
+                }
+
+                if (isLineWin) {
+                    let basePayoutMultiplier;
+                    if (actualWinningSymbol === '🐯' && !(s1 === '🐯' && s2 === '🐯' && s3 === '🐯')) {
+                        // Se o Wild completou, use o payout do símbolo não-wild
+                        const nonWildSymbol = [s1, s2, s3].find(sym => sym !== '🐯');
+                        basePayoutMultiplier = payouts[nonWildSymbol];
+                    } else {
+                        // Caso contrário, use o payout do símbolo diretamente (incluindo 3 wilds)
+                        basePayoutMultiplier = payouts[actualWinningSymbol];
+                    }
+                    
+                    lineWinAmount = betAmount * basePayoutMultiplier;
+                    totalWinAmount += lineWinAmount;
+                    winningLinesCount++;
+
+                    // Adiciona os slots vencedores para destaque
+                    line.forEach(pos => {
+                        highlightSlots.add(`${pos[0]}-${pos[1]}`);
+                    });
+                }
+            }
+            
+            let message = "";
+            let isBigWin = false;
+
+            // Multiplicador 10x para tela cheia
+            if (fullScreenMatch && winningLinesCount > 0) { // Garante que houve um ganho e a tela foi preenchida
+                totalWinAmount *= 10;
+                message = `🔥 MEGA VITÓRIA! TELA CHEIA! Multiplicador 10x! Ganhou R$ ${totalWinAmount.toFixed(2)}!`;
+                isBigWin = true;
+            } else if (winningLinesCount > 0) {
+                 // Verifica se houve uma combinação de 3 tigres puros (que já aplica um payout alto)
+                if (finalGrid[0][1] === '🐯' && finalGrid[1][1] === '🐯' && finalGrid[2][1] === '🐯') { // Consideramos a linha do meio para 3 tigres puros como o principal jackpot
+                    totalWinAmount = betAmount * 500; // Payout fixo para 3 tigres puros
+                    message = `🐅 TRÊS TIGRES! 🔥 MEGA BÔNUS DE R$ ${totalWinAmount.toFixed(2)}!`;
+                    isBigWin = true;
+                } else {
+                    message = `🎉 Vitória em ${winningLinesCount} linha(s)! Ganhou R$ ${totalWinAmount.toFixed(2)}!`;
+                }
+            } else {
+                message = "Que pena, não foi dessa vez!";
+                noWinSound.currentTime = 0;
+                noWinSound.play();
+            }
+
+            if (totalWinAmount > 0) {
+                playerBalance += totalWinAmount;
                 if (isBigWin) {
                     bigWinSound.currentTime = 0;
                     bigWinSound.play();
@@ -591,27 +771,30 @@
                     winSound.play();
                 }
                 launchConfetti();
-            } else {
-                noWinSound.currentTime = 0;
-                noWinSound.play();
+                // Aplica o destaque visual nos símbolos vencedores
+                highlightSlots.forEach(posStr => {
+                    const [r, s] = posStr.split('-').map(Number);
+                    symbolSlots[r][s].classList.add('winning-symbol');
+                });
             }
 
             winningsDisplay.textContent = message;
             updateBalanceDisplay();
         }
 
+        // --- Efeitos Visuais (Confetti) ---
         function launchConfetti() {
             const colors = ['#f1c40f', '#e67e22', '#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#ffea00', '#00ffc8'];
-            for (let i = 0; i < 70; i++) { // Mais confetes para mais impacto
+            for (let i = 0; i < 70; i++) {
                 const confetti = document.createElement('div');
                 confetti.classList.add('confetti');
                 confetti.style.left = `${Math.random() * 100}vw`;
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 confetti.style.animationDuration = `${Math.random() * 2 + 3}s`;
                 confetti.style.animationDelay = `${Math.random() * 0.8}s`;
-                confetti.style.width = `${Math.random() * 8 + 5}px`; // Tamanhos variados
+                confetti.style.width = `${Math.random() * 8 + 5}px`;
                 confetti.style.height = `${Math.random() * 8 + 5}px`;
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px'; // Redondo ou quadrado
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
                 confettiContainer.appendChild(confetti);
 
                 confetti.addEventListener('animationend', () => {
@@ -624,14 +807,16 @@
             confettiContainer.innerHTML = '';
         }
 
-        // Initial setup
+        // --- Inicialização e Event Listeners ---
         loadBalance();
         updateBalanceDisplay();
-        updateBetDisplay(); // Atualiza o display da aposta inicial
+        updateBetDisplay();
 
-        // Adiciona evento para atualizar o display da aposta quando o input muda
         betAmountInput.addEventListener('input', updateBetDisplay);
-        betAmountInput.addEventListener('change', updateBetDisplay); // Para garantir atualização ao sair do campo
+        betAmountInput.addEventListener('change', updateBetDisplay);
+
+        startAutoSpinButton.addEventListener('click', startAutoSpin);
+        stopAutoSpinButton.addEventListener('click', stopAutoSpin);
 
         spinSound.load();
         winSound.load();
