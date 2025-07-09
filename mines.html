@@ -3,180 +3,400 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jogo Estilo Mines</title>
+    <title>Mines - Onde a Sorte Encontra a Estratégia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #1a1a2e; /* Fundo principal */
+            --card-bg: #211a30; /* Fundo dos elementos de controle/informação */
+            --grid-cell-bg: #332a4e; /* Fundo das células não clicadas */
+            --mine-color: #ff4d4d; /* Vermelho vibrante para minas */
+            --star-color: #00ff00; /* Verde neon para estrelas */
+            --text-color: #e0e0e0;
+            --highlight-color: #ffcc00; /* Amarelo dourado para destaque */
+            --button-primary: #8e5bd6; /* Roxo para botões de ação */
+            --button-hover: #a178ed;
+            --button-disabled: #6a6a80;
+            --shadow-light: rgba(255, 204, 0, 0.3);
+            --shadow-dark: rgba(0, 0, 0, 0.7);
+        }
+
         body {
-            font-family: sans-serif;
-            background-color: #1e1e2f;
-            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
+            overflow-x: hidden; /* Evita scroll horizontal */
+            background-image: radial-gradient(circle at center, #2c2547 0%, #1a1a2e 70%); /* Gradiente de fundo */
         }
 
         h1 {
-            margin-bottom: 10px;
+            color: var(--highlight-color);
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            text-shadow: 0 0 15px var(--highlight-color), 0 0 30px var(--highlight-color); /* Efeito neon */
+            animation: pulseNeon 2s infinite alternate; /* Animação sutil */
         }
 
-        #controls {
-            margin-bottom: 20px;
+        @keyframes pulseNeon {
+            from { text-shadow: 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color); }
+            to { text-shadow: 0 0 15px var(--highlight-color), 0 0 30px var(--highlight-color); }
+        }
+
+        #game-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--button-primary);
+            width: 100%;
+            max-width: 600px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
             align-items: center;
         }
 
-        #controls input {
-            width: 60px;
-            text-align: center;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background-color: #333;
-            color: #fff;
-        }
-
-        #balance { /* Novo estilo para o saldo */
-            font-size: 1.4em;
+        #balance {
+            font-family: 'Orbitron', sans-serif; /* Fonte mais moderna para números */
+            font-size: 1.8em;
             font-weight: bold;
-            color: #1aff00; /* Cor verde para destaque do saldo */
-            margin-bottom: 15px;
-            background-color: #333;
-            padding: 8px 15px;
+            color: var(--star-color);
+            margin-bottom: 25px;
+            background-color: var(--grid-cell-bg);
+            padding: 12px 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            border: 2px solid var(--star-color);
+            text-shadow: 0 0 8px var(--star-color);
+        }
+
+        #controls {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #3f325a; /* Fundo para os grupos de input */
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--button-primary);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .input-group label {
+            font-size: 0.9em;
+            white-space: nowrap; /* Evita quebra de linha */
+        }
+
+        .input-group input[type="number"] {
+            width: 80px;
+            padding: 8px;
             border-radius: 8px;
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
-        }
-
-        #score {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            color: #ffc107;
-        }
-
-        #multiplier, #currentBetInfo {
+            border: 1px solid var(--button-primary);
+            background-color: #2a223f;
+            color: var(--star-color);
+            font-family: 'Orbitron', sans-serif;
             font-size: 1.1em;
-            margin-bottom: 10px;
+            text-align: center;
+            -moz-appearance: textfield; /* Remove setas em Firefox */
         }
 
+        .input-group input[type="number"]::-webkit-outer-spin-button,
+        .input-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            width: 100%;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            flex-grow: 1; /* Para os botões preencherem o espaço */
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .bet {
+            background-color: var(--star-color); /* Verde neon */
+            color: #000;
+            border: 2px solid var(--star-color);
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .bet:hover:not(:disabled) {
+            background-color: #00e600;
+            box-shadow: 0 8px 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .bet:disabled {
+            background-color: var(--button-disabled);
+            color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.8;
+            box-shadow: none;
+        }
+
+        .cashout {
+            background-color: var(--highlight-color); /* Amarelo dourado */
+            color: #000;
+            border: 2px solid var(--highlight-color);
+            text-shadow: 0 0 5px var(--highlight-color);
+        }
+
+        .cashout:hover:not(:disabled) {
+            background-color: #ffeb3b;
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.6);
+        }
+
+        .cashout:disabled {
+            background-color: var(--button-disabled);
+            color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.8;
+            box-shadow: none;
+        }
+
+        .game-info {
+            width: 100%;
+            max-width: 400px;
+            background-color: #2a223f;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-top: 25px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--button-primary);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 1.1em;
+        }
+
+        .game-info div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+        }
+        .game-info div:last-child {
+            border-bottom: none;
+        }
+
+        .game-info span {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            color: var(--highlight-color);
+        }
+        #potentialWinnings span {
+            color: var(--star-color); /* Verde para os ganhos potenciais */
+            text-shadow: 0 0 5px var(--star-color);
+        }
+        
         #grid {
             display: grid;
-            grid-template-columns: repeat(5, 60px);
-            grid-gap: 10px;
-            margin-top: 20px;
+            grid-template-columns: repeat(5, 70px); /* Células um pouco maiores */
+            grid-gap: 12px; /* Espaçamento maior entre células */
+            margin-top: 40px;
+            border: 5px solid var(--button-primary);
+            border-radius: 15px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
         }
 
         .cell {
-            width: 60px;
-            height: 60px;
-            background-color: #333;
-            border-radius: 6px;
+            width: 70px;
+            height: 70px;
+            background-color: var(--grid-cell-bg);
+            border-radius: 8px; /* Bordas mais suaves */
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            font-size: 24px;
-            transition: background-color 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.2em; /* Tamanho maior para os emojis - aqui controlamos o tamanho direto */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid #5a487f; /* Borda sutil */
+            line-height: 1; /* Ajusta a altura da linha para centralizar o emoji */
         }
 
-        .cell:hover:not(.safe):not(.mine):not(.clicked-disabled) { /* Ajuste para hover */
-            background-color: #555;
+        .cell:hover:not(.safe):not(.mine):not(.clicked-disabled) {
+            background-color: #4a3c6b; /* Laranja mais escuro no hover */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
         }
 
-        .clicked-disabled { /* Para células clicadas ou game over */
+        .clicked-disabled {
             cursor: default !important;
+            pointer-events: none; /* Desabilita cliques na célula */
         }
 
         .safe {
-            background-color: #4caf50;
-            color: white;
+            background-color: var(--star-color); /* Verde neon */
+            color: #000;
             animation: pop 0.2s ease-out;
+            box-shadow: 0 0 15px var(--star-color), inset 0 0 8px rgba(0, 0, 0, 0.4);
+            border-color: var(--star-color);
         }
-
+        
         .mine {
-            background-color: #f44336;
-            color: white;
+            background-color: var(--mine-color); /* Vermelho vibrante */
+            color: #000;
             animation: shake 0.3s;
+            box-shadow: 0 0 15px var(--mine-color), inset 0 0 8px rgba(0, 0, 0, 0.4);
+            border-color: var(--mine-color);
         }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .bet {
-            background-color: #4caf50;
-            color: white;
-        }
-
-        .bet:disabled {
-            background-color: #2e7d32;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .cashout {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        .cashout:disabled {
-            background-color: #ffeb3b;
-            color: #616161;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
+       
         @keyframes pop {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { transform: scale(0.7); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
         }
 
         @keyframes shake {
             0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
+            25% { transform: translateX(-8px) rotate(-3deg); }
+            50% { transform: translateX(8px) rotate(3deg); }
+            75% { transform: translateX(-8px) rotate(-3deg); }
             100% { transform: translateX(0); }
+        }
+
+        /* Mensagem de resultado do jogo */
+        #gameMessage {
+            margin-top: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 1.5em; /* Garante espaço */
+            color: var(--highlight-color);
+            text-shadow: 0 0 8px var(--highlight-color);
+        }
+        .message-win {
+            color: var(--star-color);
+            text-shadow: 0 0 8px var(--star-color);
+        }
+        .message-lose {
+            color: var(--mine-color);
+            text-shadow: 0 0 8px var(--mine-color);
+        }
+
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+            #game-container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+            #balance {
+                font-size: 1.5em;
+                padding: 10px 20px;
+            }
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .input-group label {
+                font-size: 0.8em;
+            }
+            .input-group input[type="number"] {
+                width: 100px;
+                font-size: 1em;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            button {
+                font-size: 1em;
+                padding: 12px 20px;
+            }
+            .game-info {
+                font-size: 0.9em;
+                padding: 12px 15px;
+            }
+            #grid {
+                grid-template-columns: repeat(5, 55px); /* Células menores em mobile */
+                grid-gap: 8px;
+                padding: 10px;
+            }
+            .cell {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8em; /* Ajuste o tamanho do emoji aqui para mobile */
+            }
+            /* Removendo as regras de pseudo-elemento e hide-text para mobile também */
+            /* .safe::before, .mine::before {
+                font-size: 1.8em;
+            } */
+            #gameMessage {
+                font-size: 1em;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Jogo Estilo Mines</h1>
+    <h1>Mines: O Desafio da Fortuna</h1>
 
-    <div id="balance">Saldo: <span id="currentBalance">20.00</span> BRL</div>
+    <div id="game-container">
+        <div id="balance">Saldo: <span id="currentBalance">20.00</span> BRL</div>
 
-    <div id="controls">
-        <div>
-            <label for="mineCount">Minas: </label>
-            <input type="number" id="mineCount" min="1" max="24" value="3">
+        <div id="controls">
+            <div class="input-group">
+                <label for="mineCount">Minas:</label>
+                <input type="number" id="mineCount" min="1" max="24" value="3">
+            </div>
+            <div class="input-group">
+                <label for="betAmount">Aposta (BRL):</label>
+                <input type="number" id="betAmount" min="1" value="3.00" step="0.50">
+            </div>
+            <div class="button-group">
+                <button class="bet" id="betButton" onclick="startGame()">Apostar</button>
+                <button class="cashout" id="cashOutButton" onclick="cashOut()" disabled>Retirar</button>
+            </div>
         </div>
-        <div>
-            <label for="betAmount">Aposta (BRL): </label>
-            <input type="number" id="betAmount" min="1" value="3" step="0.50">
+
+        <div class="game-info">
+            <div>Aposta Atual: <span id="currentBet">0.00</span> BRL</div>
+            <div>Multiplicador: <span id="currentMultiplier">1.00x</span></div>
+            <div>Ganhos Potenciais: <span id="potentialWinnings">0.00</span> BRL</div>
         </div>
-        <div>
-            <button class="bet" id="betButton" onclick="startGame()">Apostar</button>
-            <button class="cashout" id="cashOutButton" onclick="cashOut()" disabled>Retirar</button>
-        </div>
+        
+        <div id="grid"></div>
+
+        <div id="gameMessage"></div>
     </div>
-
-    <div id="currentBetInfo">Aposta Atual: <span id="currentBet">0.00</span> BRL</div>
-    <div id="multiplier">Multiplicador: <span id="currentMultiplier">1.00x</span></div>
-    <div id="score">Ganhos Potenciais: <span id="potentialWinnings">0.00</span> BRL</div>
-    
-    <div id="grid"></div>
-
     <script>
         const gridElement = document.getElementById("grid");
         const mineCountInput = document.getElementById("mineCount");
@@ -187,6 +407,7 @@
         const currentBetDisplay = document.getElementById("currentBet");
         const currentMultiplierDisplay = document.getElementById("currentMultiplier");
         const potentialWinningsDisplay = document.getElementById("potentialWinnings");
+        const gameMessageDisplay = document.getElementById("gameMessage"); // Novo elemento para mensagens
 
         let gameActive = false;
         let cells = [];
@@ -196,7 +417,8 @@
         let currentMultiplier = 1.00;
         let playerBalance = 20.00; // Valor padrão, será sobrescrito pelo localStorage
 
-        // Sound effects
+        // Sound effects (verifique se os caminhos dos arquivos estão corretos!)
+        // click.mp3, mine_explosion.mp3, win_sound.mp3
         const clickSound = new Audio('click.mp3'); 
         const mineSound = new Audio('mine_explosion.mp3');
         const winSound = new Audio('win_sound.mp3');
@@ -272,22 +494,35 @@
         function startGame() {
             if (gameActive) return;
 
+            // Limpa mensagens anteriores
+            gameMessageDisplay.textContent = "";
+            gameMessageDisplay.classList.remove("message-win", "message-lose");
+
+
             const numMines = parseInt(mineCountInput.value);
             const bet = parseFloat(betAmountInput.value);
 
             if (isNaN(numMines) || numMines < 1 || numMines > 24) {
-                alert("Por favor, insira um número de minas válido (1-24).");
+                gameMessageDisplay.textContent = "Minas inválidas (1-24).";
+                gameMessageDisplay.classList.add("message-lose");
                 return;
             }
             if (isNaN(bet) || bet <= 0) {
-                alert("Por favor, insira um valor de aposta válido.");
+                gameMessageDisplay.textContent = "Aposta inválida.";
+                gameMessageDisplay.classList.add("message-lose");
                 return;
-            }
+                }
             if (bet > playerBalance) {
-                alert(`Saldo insuficiente! Você tem R$ ${playerBalance.toFixed(2)}.`);
+                gameMessageDisplay.textContent = `Saldo insuficiente! Você tem R$ ${playerBalance.toFixed(2)}.`;
+                gameMessageDisplay.classList.add("message-lose");
                 return;
             }
-
+            if (bet < 1) { // Mínimo de aposta de 1 BRL
+                gameMessageDisplay.textContent = "A aposta mínima é R$ 1.00.";
+                gameMessageDisplay.classList.add("message-lose");
+                return;
+            }
+            
             // Subtrai a aposta do saldo
             playerBalance -= bet;
             
@@ -316,8 +551,9 @@
             if (mineLocations.has(cellIndex)) {
                 mineSound.play(); // Toca o som da mina
                 cell.classList.add("mine");
-                cell.textContent = "💣";
-                alert(`Game Over! Você encontrou uma mina e perdeu R$ ${currentBet.toFixed(2)}.`);
+                cell.textContent = "💣"; // Mantém o emoji no JS
+                gameMessageDisplay.textContent = `Game Over! Você encontrou uma mina e perdeu R$ ${currentBet.toFixed(2)}.`;
+                gameMessageDisplay.classList.add("message-lose");
                 
                 gameActive = false;
                 revealAll(true);
@@ -325,29 +561,30 @@
                 cashOutButton.disabled = true;
                 currentBet = 0; // Zera a aposta atual
                 currentMultiplier = 1.00; // Reseta o multiplicador
-                updateDisplays(); // Atualiza displays e salva (saldo já foi descontado na aposta)
+                updateDisplays();
             } else {
                 clickSound.play(); // Toca o som de clique
                 cell.classList.add("safe");
-                cell.textContent = "⭐";
+                cell.textContent = "⭐"; // Mantém o emoji no JS
                 clickedSafeCells++;
                 currentMultiplier = getMultiplier(clickedSafeCells, parseInt(mineCountInput.value));
-                updateDisplays(); // Atualiza displays e salva
+                updateDisplays();
 
                 // Check for win condition (all safe cells found)
                 if (clickedSafeCells === (TOTAL_CELLS - parseInt(mineCountInput.value))) {
                     const totalWinnings = parseFloat(potentialWinningsDisplay.textContent);
                     playerBalance += totalWinnings; // Adiciona ganhos ao saldo
                     winSound.play(); // Toca o som de vitória
-                    alert(`Parabéns! Você encontrou todas as estrelas! Você ganhou R$ ${totalWinnings.toFixed(2)}.`);
+                    gameMessageDisplay.textContent = `Parabéns! Você encontrou todas as estrelas! Você ganhou R$ ${totalWinnings.toFixed(2)}.`;
+                    gameMessageDisplay.classList.add("message-win");
                     
                     gameActive = false;
                     revealAll(false); // Revela como safe, já que todas as minas foram evitadas
                     disableControls(false);
                     cashOutButton.disabled = true;
-                    currentBet = 0; // Zera a aposta atual
-                    currentMultiplier = 1.00; // Reseta o multiplicador
-                    updateDisplays(); // Atualiza displays e salva
+                    currentBet = 0;
+                    currentMultiplier = 1.00;
+                    updateDisplays();
                 }
             }
         }
@@ -358,36 +595,37 @@
             const totalWinnings = parseFloat(potentialWinningsDisplay.textContent);
             playerBalance += totalWinnings; // Adiciona ganhos ao saldo
             winSound.play(); // Toca o som de vitória
-            alert(`Você retirou R$ ${totalWinnings.toFixed(2)}! Parabéns!`);
+            gameMessageDisplay.textContent = `Você retirou R$ ${totalWinnings.toFixed(2)}! Parabéns!`;
+            gameMessageDisplay.classList.add("message-win");
             
             gameActive = false;
             revealAll(true); // Revela as minas restantes para o jogador ver
             disableControls(false);
             cashOutButton.disabled = true;
-            currentBet = 0; // Zera a aposta atual
-            currentMultiplier = 1.00; // Reseta o multiplicador
-            updateDisplays(); // Atualiza displays e salva
+            currentBet = 0;
+            currentMultiplier = 1.00;
+            updateDisplays();
         }
 
         function revealAll(showMines) {
             cells.forEach((cell, index) => {
-                // Remove o event listener para evitar cliques após o fim do jogo
                 cell.removeEventListener("click", handleCellClick);
-                cell.classList.add("clicked-disabled"); // Desabilita o cursor e hover
+                cell.classList.add("clicked-disabled");
 
                 if (mineLocations.has(index)) {
                     cell.classList.add("mine");
-                    cell.textContent = "💣";
-                } else if (!mineLocations.has(index) && showMines === false) {
+                    cell.textContent = "💣"; // Mantém o emoji no JS
+                } else if (!mineLocations.has(index) && cell.dataset.clicked === "false") {
+                     // Revela como safe apenas as células não clicadas, se a condição não for game over por mina
                     cell.classList.add("safe");
-                    cell.textContent = "⭐";
+                    cell.textContent = "⭐"; // Mantém o emoji no JS
                 }
             });
         }
 
         // Initial setup
-        loadBalance(); // Carrega o saldo ao iniciar a página
-        updateDisplays(); // Atualiza o display com o saldo carregado
+        loadBalance();
+        updateDisplays();
         disableControls(false);
         createGrid();
     </script>
