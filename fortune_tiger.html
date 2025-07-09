@@ -505,8 +505,9 @@
 
         let playerBalance = 0;
         let isSpinning = false;
-        let autoSpinInterval = null;
+        let autoSpinInterval = null; // Changed to boolean flag for clarity, as setTimeout handles the loop
         let remainingAutoSpins = 0;
+        let spinTimeoutId = null; // To store the ID of the setTimeout for auto-spin
 
         // Altura de um slot para calcular a translação
         const SLOT_HEIGHT = 150; // px (ajustar de acordo com o CSS --slot-height)
@@ -601,12 +602,12 @@
 
             if (isNaN(betAmount) || betAmount <= 0) {
                 alert("Por favor, insira um valor de aposta válido.");
-                stopAutoSpin();
+                stopAutoSpin(); // Stop auto-spin if bet is invalid
                 return;
             }
-            if (betAmount > playerBalance) {
+            if (playerBalance < betAmount) {
                 alert(`Saldo insuficiente! Você tem R$ ${playerBalance.toFixed(2)}. Por favor, diminua sua aposta ou adicione fundos.`);
-                stopAutoSpin();
+                stopAutoSpin(); // Stop auto-spin if balance is insufficient
                 return;
             }
 
@@ -656,8 +657,6 @@
                     reelInner.innerHTML += spinSymbolsHtml; // Adiciona a sequência de símbolos após os dummies
 
                     // Calcula o quanto o rolo precisa mover para parar nos símbolos corretos
-                    // A quantidade total de slots a serem percorridos até que os 3 últimos (finais) fiquem visíveis no centro.
-                    // Isso significa que precisamos rolar 30 + 9 (dummies) = 39 slots abaixo do início dos símbolos finais
                     const totalVisibleSlots = 3; // O número de slots que queremos ver no final da rolagem
                     const totalGeneratedSymbols = 9 + 30 + 3; // Dummies + Spin Symbols + Final Symbols
                     const distanceToMove = (totalGeneratedSymbols - totalVisibleSlots) * SLOT_HEIGHT; 
@@ -704,15 +703,22 @@
             betAmountInput.disabled = false;
             startAutoSpinButton.disabled = false;
 
+            // Auto-spin logic
             if (autoSpinInterval && remainingAutoSpins > 0) {
                 remainingAutoSpins--;
+                console.log(`Auto-spin: ${remainingAutoSpins} spins remaining.`);
                 if (remainingAutoSpins > 0) {
                     winningsDisplay.textContent += ` (${remainingAutoSpins} giros restantes)`;
-                    setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
+                    // Schedule the next spin
+                    spinTimeoutId = setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
                 } else {
                     stopAutoSpin();
                     winningsDisplay.textContent += " (Auto-giro concluído!)";
                 }
+            } else if (remainingAutoSpins === 0 && autoSpinInterval) {
+                 // This handles the case where the last spin just finished for auto-spin
+                 stopAutoSpin();
+                 winningsDisplay.textContent += " (Auto-giro concluído!)";
             }
         }
 
@@ -798,116 +804,117 @@
                 } else if (s1 === '🐯' && s3 === '🐯') { // 2 Wilds, 2o símbolo
                     isLineWin = true;
                     actualWinningSymbol = s2;
-                    if (s2 === '🐯') actualWinningSymbol = '🐯';
+                    if (s2 === '🐯') actualWinningSymbol = '🐯'; // Se todos forem Wilds
                 } else if (s2 === '🐯' && s3 === '🐯') { // 2 Wilds, 1o símbolo
                     isLineWin = true;
                     actualWinningSymbol = s1;
-                    if (s1 === '🐯') actualWinningSymbol = '🐯';
+                    if (s1 === '🐯') actualWinningSymbol = '🐯'; // Se todos forem Wilds
                 }
                 
                 if (isLineWin) {
-                    // Payout para 3 Wilds puros é o do Wild
-                    if (s1 === '🐯' && s2 === '🐯' && s3 === '🐯') {
-                        lineWinAmount = payouts['🐯'] * betAmount;
-                    } else if (actualWinningSymbol && payouts[actualWinningSymbol]) {
-                        lineWinAmount = payouts[actualWinningSymbol] * betAmount;
-                    }
+                    lineWinAmount = payouts[actualWinningSymbol] * betAmount;
+                    totalWinAmount += lineWinAmount;
+                    winningLinesCount++;
 
-                    if (lineWinAmount > 0) {
-                        totalWinAmount += lineWinAmount;
-                        winningLinesCount++;
-                        // Adiciona os slots vencedores para destaque
-                        highlightSlots.add(`${line[0][0]},${line[0][1]}`);
-                        highlightSlots.add(`${line[1][0]},${line[1][1]}`);
-                        highlightSlots.add(`${line[2][0]},${line[2][1]}`);
-                    }
+                    // Adiciona os slots vencedores ao conjunto para destaque
+                    highlightSlots.add(line[0][0] * 10 + line[0][1]); // encoding reel_idx and slot_idx
+                    highlightSlots.add(line[1][0] * 10 + line[1][1]);
+                    highlightSlots.add(line[2][0] * 10 + line[2][1]);
                 }
             }
 
-            // Aplica o multiplicador x10 se houver tela cheia do mesmo símbolo (ou com Wilds completando)
-            if (fullScreenMatch && totalWinAmount > 0) { // Só aplica se já houver uma vitória base
-                winningsDisplay.textContent = `TELA CHEIA! ${referenceSymbol.repeat(3)} x 3! Ganhos Multiplicados por 10x!`;
-                totalWinAmount *= 10;
-                isBigWin = true; // Força Big Win para tela cheia
-            } else if (winningLinesCount > 0) {
-                winningsDisplay.textContent = `Você ganhou em ${winningLinesCount} linha(s)!`;
-                if (totalWinAmount >= betAmount * 5) { // Exemplo: 5x a aposta é uma "big win"
-                    isBigWin = true;
-                }
-            } else {
-                winningsDisplay.textContent = "Nenhuma vitória. Tente novamente!";
-                noWinSound.play();
+            if (fullScreenMatch && referenceSymbol !== '') {
+                // If there's a full screen match (all same symbol or wild-filled)
+                // This means all 5 paylines would have hit for that symbol.
+                // You might want to override totalWinAmount and multiply it by 10x
+                console.log("FULL SCREEN MATCH! Applying 10x multiplier.");
+                totalWinAmount = (payouts[referenceSymbol] * betAmount * 5) * 10; // Base win for 5 lines * 10x
+                isBigWin = true;
             }
 
-            playerBalance += totalWinAmount;
-            updateBalanceDisplay();
 
             if (totalWinAmount > 0) {
-                if (isBigWin) {
+                playerBalance += totalWinAmount;
+                updateBalanceDisplay();
+                winningsDisplay.textContent = `Você Ganhou: R$ ${totalWinAmount.toFixed(2)}!`;
+
+                if (totalWinAmount >= (betAmount * 5) || isBigWin) { // Define 'big win' as 5x bet or full screen
                     bigWinSound.play();
                     createConfetti();
                 } else {
                     winSound.play();
                 }
 
-                // Aplica destaque visual aos símbolos vencedores
-                highlightSlots.forEach(coord => {
-                    const [reelIndex, slotIndex] = coord.split(',').map(Number);
-                    // Acessa o elemento do DOM diretamente
-                    const symbolElement = reelInners[reelIndex].children[slotIndex];
-                    if (symbolElement) {
-                        symbolElement.classList.add('winning-symbol');
+                // Apply highlights after determining all winning slots
+                highlightSlots.forEach(encodedPosition => {
+                    const reelIdx = Math.floor(encodedPosition / 10);
+                    const slotIdx = encodedPosition % 10;
+                    // Need to select the actual symbol element after the reel has settled
+                    const symbolElements = reelInners[reelIdx].querySelectorAll('.symbol-slot');
+                    if (symbolElements[slotIdx]) {
+                        symbolElements[slotIdx].classList.add('winning-symbol');
                     }
                 });
+
+            } else {
+                winningsDisplay.textContent = "Não foi dessa vez. Tente novamente!";
+                noWinSound.play();
             }
         }
 
-
-        // --- Auto Spin Logic ---
+        // --- Auto-Spin Functions ---
         function startAutoSpin() {
-            remainingAutoSpins = parseInt(autoSpinCountInput.value);
-            if (isNaN(remainingAutoSpins) || remainingAutoSpins <= 0) {
-                alert("Por favor, insira um número válido para giros automáticos.");
+            const spins = parseInt(autoSpinCountInput.value);
+            if (isNaN(spins) || spins <= 0) {
+                alert("Por favor, insira um número válido de giros automáticos.");
                 return;
             }
-
+            if (isSpinning) { // Prevents starting auto-spin while a manual spin is already in progress
+                console.log("Already spinning, cannot start auto-spin.");
+                return;
+            }
+            
+            console.log("Starting auto-spin. Initial spins:", spins);
+            remainingAutoSpins = spins;
+            autoSpinInterval = true; // Set the flag to true
             startAutoSpinButton.style.display = 'none';
             stopAutoSpinButton.style.display = 'inline-block';
-            betAmountInput.disabled = true; // Desabilita mudança de aposta durante auto-spin
-
-            spinReels(); // Inicia o primeiro giro
+            
+            spinReels(); // Start the first auto-spin
         }
 
         function stopAutoSpin() {
-            clearInterval(autoSpinInterval);
-            autoSpinInterval = null;
-            remainingAutoSpins = 0;
-            
+            console.log("Stopping auto-spin.");
+            clearTimeout(spinTimeoutId); // Clear any pending setTimeout for the next spin
+            autoSpinInterval = null; // Reset the flag
+            remainingAutoSpins = 0; // Reset count
+            spinButton.disabled = false;
+            betAmountInput.disabled = false;
             startAutoSpinButton.style.display = 'inline-block';
             stopAutoSpinButton.style.display = 'none';
-            spinButton.disabled = false; // Reabilita o botão de giro manual
-            betAmountInput.disabled = false; // Reabilita a mudança de aposta
-            isSpinning = false; // Garante que o estado de giro é resetado
+            winningsDisplay.textContent = "Auto-giro parado.";
+            clearConfetti(); // Clear any confetti if stopping mid-win
         }
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             loadBalance();
             updateBalanceDisplay();
-            updateBetDisplay(); // Atualiza a aposta inicial no display
+            updateBetDisplay();
+        });
 
-            betAmountInput.addEventListener('input', updateBetDisplay);
-            startAutoSpinButton.addEventListener('click', startAutoSpin);
-            stopAutoSpinButton.addEventListener('click', stopAutoSpin);
+        betAmountInput.addEventListener('change', updateBetDisplay);
+        betAmountInput.addEventListener('keyup', updateBetDisplay); // Also update on keyup
 
-            // Inicializa os rolos com símbolos para evitar tela em branco
-            reelInners.forEach(reelInner => {
-                let initialSymbols = '';
-                for (let i = 0; i < 3; i++) { // 3 símbolos visíveis
-                    initialSymbols += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
-                }
-                reelInner.innerHTML = initialSymbols;
-            });
+        // Attach event listeners for auto-spin buttons
+        startAutoSpinButton.addEventListener('click', startAutoSpin);
+        stopAutoSpinButton.addEventListener('click', stopAutoSpin);
+
+        // Initial setup for the reels (display some random symbols)
+        reelInners.forEach(reelInner => {
+            for (let i = 0; i < 3; i++) { // Show 3 initial random symbols
+                reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+            }
         });
     </script>
 </body>
