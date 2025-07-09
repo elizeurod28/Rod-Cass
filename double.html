@@ -80,23 +80,20 @@
             border-radius: 15px;
             border: 3px solid #f44336; /* Vermelho vibrante */
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7);
-            overflow: hidden;
+            overflow: hidden; /* Mantém o conteúdo dentro */
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Alinha os itens da roda à esquerda */
         }
 
         .wheel {
             display: flex;
             height: 100%;
-            /* Remove fixed width to allow items to flow */
-            transform: translateX(0); /* Will be manipulated by JS */
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Curva de desaceleração */
-        }
-
-        .wheel.spinning {
-            transition: none; /* Disable transition during initial fast spin */
+            /* Remover width fixo aqui, será definido dinamicamente */
+            transform: translateX(0); /* Será manipulado por JS */
+            /* A transição será adicionada via JS para controle preciso */
+            /* transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); */ 
         }
 
         .wheel-segment {
@@ -110,6 +107,7 @@
             color: #fff;
             border-right: 1px solid rgba(0,0,0,0.3);
             flex-shrink: 0; /* Prevents segments from shrinking */
+            box-sizing: border-box; /* Garante que padding/border não aumentem a largura */
         }
 
         .segment-red { background-color: #f44336; } /* Vermelho */
@@ -427,7 +425,7 @@
     <div class="game-container">
         <div class="double-wheel-container">
             <div class="wheel" id="doubleWheel">
-                </div>
+            </div>
             <div class="wheel-indicator"></div>
         </div>
 
@@ -474,7 +472,7 @@
     <div class="history-container">
         <h2>Últimos Resultados</h2>
         <div class="history-list" id="historyList">
-            </div>
+        </div>
     </div>
 
     <a href="index.html" class="back-button">Voltar para a Página Principal</a>
@@ -499,6 +497,7 @@
         const maxHistoryItems = 20; // Quantos itens mostrar no histórico
 
         // Sons (placeholders)
+        // Certifique-se de que esses arquivos de áudio existam no mesmo diretório ou caminho correto
         const spinSound = new Audio('blaze_spin.mp3');
         const winSound = new Audio('blaze_win.mp3');
         const loseSound = new Audio('blaze_lose.mp3');
@@ -506,7 +505,7 @@
         // Estrutura da roleta - 14 vermelho, 14 preto, 2 branco
         // Para simular a roleta real, podemos ter a sequência em uma ordem específica
         // Aqui, uma ordem que garante a distribuição e um bom visual
-        const wheelSegments = [
+        const baseWheelSegments = [
             { color: "red", value: "8" }, { color: "black", value: "15" },
             { color: "red", value: "2" }, { color: "black", value: "11" },
             { color: "red", value: "7" }, { color: "black", value: "1" },
@@ -515,15 +514,16 @@
             { color: "red", value: "3" }, { color: "black", value: "10" },
             { color: "red", value: "6" }, { color: "black", value: "13" },
             { color: "white", value: "0" }, // Primeiro branco
-            { color: "red", value: "8" }, { color: "black", value: "15" }, // Repetindo para o ciclo
+            { color: "red", value: "8" }, { color: "black", value: "15" },
             { color: "red", value: "2" }, { color: "black", value: "11" },
             { color: "red", value: "7" }, { color: "black", value: "1" },
             { color: "red", value: "14" }, { color: "black", value: "9" },
             { color: "red", value: "5" }, { color: "black", value: "12" },
             { color: "red", value: "3" }, { color: "black", value: "10" },
             { color: "red", value: "6" }, { color: "black", value: "13" },
-            { color: "white", value: "00" } // Segundo branco (ou 00 para simular a diferença)
+            { color: "white", value: "00" } // Segundo branco
         ];
+
         // Para o sorteio, usaremos um array simplificado de cores para a probabilidade
         const winningColors = [
             ...Array(14).fill('red'),
@@ -540,7 +540,7 @@
             if (savedBalance !== null) {
                 playerBalance = parseFloat(savedBalance);
             } else {
-                playerBalance = 20.00;
+                playerBalance = 20.00; // Saldo inicial se não houver um salvo
             }
         }
 
@@ -569,15 +569,13 @@
             if (isNaN(currentBet)) currentBet = 0;
 
             if (typeof action === 'number') {
-                currentBet += action;
+                currentBet = parseFloat((currentBet + action).toFixed(2));
             } else if (action === 'half') {
-                currentBet /= 2;
+                currentBet = parseFloat((currentBet / 2).toFixed(2));
             } else if (action === 'double') {
-                currentBet *= 2;
+                currentBet = parseFloat((currentBet * 2).toFixed(2));
             } else if (action === 'max') {
-                // Para "max", usaremos o saldo atual, mas o jogador ainda pode dividir a aposta entre as cores
-                // Por simplicidade aqui, vamos apenas definir como o saldo total disponível
-                currentBet = playerBalance;
+                currentBet = playerBalance; // Aposta o saldo total
             }
             
             // Garante que o valor não seja menor que o mínimo ou negativo
@@ -598,54 +596,53 @@
                     return;
                 }
                 
-                // Verifica se o jogador tem saldo para a aposta total (considerando apostas múltiplas)
                 const totalBetSoFar = currentBets.red + currentBets.black + currentBets.white;
                 if ((totalBetSoFar + betValue) > playerBalance) {
-                     displayMessage("Saldo insuficiente para esta aposta.", "error");
-                     return;
+                    displayMessage("Saldo insuficiente para esta aposta.", "error");
+                    return;
                 }
 
-                currentBets[color] += betValue;
+                currentBets[color] = parseFloat((currentBets[color] + betValue).toFixed(2));
                 card.querySelector('.current-bet').textContent = currentBets[color].toFixed(2);
                 
-                // O saldo real só é debitado quando o jogo começa (botão girar)
-                // Temporariamente, mostramos a aposta como "pendente"
                 displayMessage(`Aposta de R$ ${betValue.toFixed(2)} adicionada ao ${color.toUpperCase()}.`, "info");
             });
         });
 
         clearBetsButton.addEventListener('click', () => {
             if (gameActive) return;
-            currentBets.red = 0;
-            currentBets.black = 0;
-            currentBets.white = 0;
-            betOptionCards.forEach(card => {
-                card.querySelector('.current-bet').textContent = '0.00';
-            });
+            resetBets(); // Usa a função de reset para limpar
             displayMessage("Todas as apostas foram limpas.", "info");
         });
 
         // Preenche a roda com os segmentos
         function populateWheel() {
             doubleWheel.innerHTML = ''; // Limpa antes de preencher
-            // Para criar um efeito de roleta, vamos duplicar os segmentos algumas vezes
-            // para que haja espaço para a animação de "giro"
-            const numCopies = 3; // Quantas vezes duplicar os segmentos
-            const extendedWheel = [];
-            for (let i = 0; i < numCopies; i++) {
-                extendedWheel.push(...wheelSegments);
+            
+            // Adicionar múltiplos blocos da roleta para um giro "contínuo"
+            // Adicionamos um número maior de segmentos para garantir que a roleta possa girar várias vezes
+            // antes de parar no segmento desejado, sem mostrar espaços vazios.
+            // Aqui, vamos duplicar o `baseWheelSegments` algumas vezes.
+            const fullWheelForDisplay = [];
+            // Adiciona cópias suficientes para que a animação tenha onde 'andar'
+            // O número 5 aqui é arbitrário, mas garante algumas rotações completas visíveis
+            for (let i = 0; i < 5; i++) { 
+                fullWheelForDisplay.push(...baseWheelSegments);
             }
+            // Adiciona mais alguns segmentos do início para a roleta parecer "infinita" ao parar
+            fullWheelForDisplay.push(...baseWheelSegments.slice(0, 10)); // Adiciona os 10 primeiros de novo
 
-            extendedWheel.forEach((segment, index) => {
+            fullWheelForDisplay.forEach((segment, index) => {
                 const div = document.createElement('div');
                 div.classList.add('wheel-segment', `segment-${segment.color}`);
-                // Adiciona um identificador único para o target na hora da animação
                 div.dataset.index = index; 
                 div.textContent = segment.value;
                 doubleWheel.appendChild(div);
             });
-            // Ajusta a largura total da roda
-            doubleWheel.style.width = (extendedWheel.length * 60) + 'px'; // 60px é min-width do segmento
+            
+            // NÃO defina a largura total da roleta aqui, deixe que o flexbox e os min-width dos segmentos a definam.
+            // O importante é que haja segmentos suficientes para a animação.
+            console.log("Wheel populated with", fullWheelForDisplay.length, "segments.");
         }
 
         function spinWheel() {
@@ -679,53 +676,76 @@
             // Determina o resultado (sorteia a cor real)
             const winningColor = winningColors[Math.floor(Math.random() * winningColors.length)];
             
-            // Encontra um segmento correspondente no meio da roda estendida para o pouso
-            let targetSegmentIndex = -1;
-            const startSearchIndex = wheelSegments.length; // Começa a procurar na segunda cópia dos segmentos
+            // --- CÁLCULO DE ANIMAÇÃO MELHORADO ---
+            // Recalcula segmentWidth no momento do spin para garantir precisão
+            const firstSegment = doubleWheel.querySelector('.wheel-segment');
+            const segmentWidth = firstSegment ? firstSegment.offsetWidth : 60; 
+            const containerWidth = doubleWheel.parentElement.offsetWidth;
+            
+            // Quantidade real de segmentos na sua "base" de uma roleta (14+14+2 = 30)
+            const actualBaseSegments = baseWheelSegments.length; 
+            
+            // Quantas rotações completas queremos que a roleta dê antes de começar a diminuir a velocidade
+            const minFullRotations = 3; 
 
-            // Tenta encontrar um segmento que corresponda à cor vencedora no meio da roda estendida
-            // Queremos que pare em uma das casas da segunda cópia (índice 30 a 59)
-            // Isso evita que a roda pare muito no início ou muito no fim.
-            const segmentsToChooseFrom = [];
-            for (let i = startSearchIndex; i < wheelSegments.length * 2; i++) {
-                if (wheelSegments[i % wheelSegments.length].color === winningColor) {
-                    segmentsToChooseFrom.push(i);
+            // Encontra um índice do segmento vencedor DENTRO da primeira *baseWheelSegments*
+            let targetSegmentVisualIndex = -1;
+            const candidates = [];
+            for (let i = 0; i < actualBaseSegments; i++) {
+                if (baseWheelSegments[i].color === winningColor) {
+                    candidates.push(i);
                 }
             }
-            targetSegmentIndex = segmentsToChooseFrom[Math.floor(Math.random() * segmentsToChooseFrom.length)];
-
-
-            const segmentWidth = doubleWheel.querySelector('.wheel-segment').offsetWidth; // Largura real do segmento
-            const centerOffset = doubleWheel.offsetWidth / 2; // Centro da área de visualização
+            targetSegmentVisualIndex = candidates[Math.floor(Math.random() * candidates.length)];
             
-            // Calcula o deslocamento para centralizar o segmento vencedor
-            // Move a roda para que o targetSegmentIndex caia no meio da view
-            const offset = (targetSegmentIndex * segmentWidth) - (centerOffset - segmentWidth / 2);
+            if (targetSegmentVisualIndex === -1) { 
+                targetSegmentVisualIndex = Math.floor(Math.random() * actualBaseSegments); // Fallback
+            }
+
+            // O ponto alvo final na roleta estendida.
+            // Queremos que ela pare em uma das *cópias* do segmento vencedor,
+            // garantindo que ela passe por várias rotações completas.
+            // Para garantir que sempre haja segmentos para a direita para parar,
+            // vamos mirar em uma das últimas cópias do baseWheelSegments.
+            // Vamos escolher a 3ª cópia (índice 2, pois é 0-indexed) como o local de parada.
+            const targetCopyIndex = 2; // Poderia ser 3, 4, etc., dependendo de quão longe você quer que ela pare
+            const finalTargetIndexInFullWheel = (targetCopyIndex * actualBaseSegments) + targetSegmentVisualIndex;
             
-            // Para simular a rotação, move muito para a esquerda e depois para a posição final
-            // Pula para uma posição bem à direita (negativa para o transform) para iniciar o giro
-            // Isso cria a ilusão de que a roleta já está girando rápido
-            const initialFastSpinOffset = doubleWheel.scrollWidth - (doubleWheel.offsetWidth / 2); // Ex: 3x total width minus half viewport
+            // Calcula o deslocamento para centralizar o segmento alvo
+            // O `offset` é a distância do início da `doubleWheel` até o centro do segmento alvo.
+            const offsetToTargetCenter = (finalTargetIndexInFullWheel * segmentWidth) + (segmentWidth / 2);
+            
+            // Para centralizar o target, a roleta precisa se mover para a esquerda,
+            // de forma que o `offsetToTargetCenter` fique no meio do `double-wheel-container`.
+            const finalTranslateX = offsetToTargetCenter - (containerWidth / 2);
 
-            doubleWheel.style.transition = 'none'; // Desliga a transição para o pulo inicial
-            doubleWheel.style.transform = `translateX(-${initialFastSpinOffset}px)`;
-            doubleWheel.classList.add('spinning'); // Adiciona classe para desabilitar transição temporariamente
+            console.log("Segment Width:", segmentWidth);
+            console.log("Winning Color:", winningColor, "Target Index in base:", targetSegmentVisualIndex);
+            console.log("Final Target Index in Full Wheel:", finalTargetIndexInFullWheel);
+            console.log("Final TranslateX (to reach center):", -finalTranslateX);
 
-            // Força um reflow para aplicar o 'transform: none' e o pulo
+
+            // 1. Resetar a transição e a posição para um ponto "inicial" que não seja visível
+            // Isso cria a ilusão de que a roleta está sempre girando.
+            // Pule para um ponto *antes* da área visível, mas que contenha a roleta completa.
+            // Por exemplo, pular para o início da segunda cópia da roleta (índice 1)
+            const jumpToX = actualBaseSegments * segmentWidth; 
+            doubleWheel.style.transition = 'none';
+            doubleWheel.style.transform = `translateX(-${jumpToX}px)`;
+            
+            // Força um reflow para garantir que a mudança de `transform` seja aplicada IMEDIATAMENTE
             void doubleWheel.offsetWidth; 
 
-            // Agora, ativa a transição e move para a posição final
+            // 2. Iniciar a transição para a posição final
             setTimeout(() => {
-                doubleWheel.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
-                doubleWheel.style.transform = `translateX(-${offset}px)`;
-            }, 50); // Pequeno delay para garantir o reflow
+                doubleWheel.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)'; // Smooth easing
+                doubleWheel.style.transform = `translateX(-${finalTranslateX}px)`;
+            }, 50); // Pequeno delay para garantir o reflow anterior
 
             doubleWheel.addEventListener('transitionend', () => handleSpinEnd(winningColor), { once: true });
         }
 
         function handleSpinEnd(finalResultColor) {
-            doubleWheel.classList.remove('spinning'); // Remove a classe de desabilita transição
-
             const totalBet = currentBets.red + currentBets.black + currentBets.white;
             let winnings = 0;
             let outcomeMessage = "";
@@ -774,14 +794,14 @@
         function addHistoryItem(color) {
             const item = document.createElement('div');
             item.classList.add('history-item', color);
-            
-            if (color === 'white') {
-                item.textContent = "B"; 
-            } else {
-                item.textContent = color.charAt(0).toUpperCase(); // R ou P
-            }
-            
-            historyList.prepend(item); // Adiciona no início
+            // Decide se mostra "B" ou "V" ou "P" ou o número. Optei pelo número.
+            // Para o número, você precisaria ter o valor do segmento que caiu.
+            // Por enquanto, vamos manter um ícone ou a letra inicial da cor para simplicidade.
+            if (color === 'white') item.textContent = 'B';
+            else if (color === 'red') item.textContent = 'V';
+            else item.textContent = 'P'; // Black
+
+            historyList.prepend(item); // Adiciona ao início
 
             // Limita o número de itens no histórico
             while (historyList.children.length > maxHistoryItems) {
@@ -789,25 +809,27 @@
             }
         }
 
-
-        // Initial setup
-        loadBalance();
-        updateBalanceDisplay();
-        populateWheel(); // Preenche a roda ao carregar
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalance();
+            updateBalanceDisplay();
+            populateWheel();
+            
+            // Adiciona alguns itens de histórico de exemplo ao carregar
+            // Para testar a visualização
+            addHistoryItem('red');
+            addHistoryItem('black');
+            addHistoryItem('white');
+            addHistoryItem('red');
+            addHistoryItem('black');
+            addHistoryItem('red');
+            addHistoryItem('white');
+            addHistoryItem('black');
+            addHistoryItem('red');
+        });
 
         spinButton.addEventListener('click', spinWheel);
 
-        // Carrega os sons
-        spinSound.load();
-        winSound.load();
-        loseSound.load();
-
-        // Para carregar um histórico inicial (opcional)
-        // addHistoryItem('red');
-        // addHistoryItem('black');
-        // addHistoryItem('white');
-        // addHistoryItem('red');
-        // addHistoryItem('black');
     </script>
 </body>
 </html>
