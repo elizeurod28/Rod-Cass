@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #004d40; /* Verde escuro do campo */
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #ffeb3b; /* Amarelo da bola */
+            margin-bottom: 25px;
+            font-size: 2.8em;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        #balance {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff9800; /* Laranja de gol */
+            margin-bottom: 30px;
+            background-color: #3e2723; /* Marrom escuro da trave */
+            padding: 10px 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.7);
+            border: 2px solid #ff5722;
+        }
+
+        .game-container {
+            background-color: #212121; /* Cinza escuro */
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            border: 4px solid #4caf50; /* Verde campo mais claro */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 600px; /* Mais largo para grids maiores */
+            width: 90%;
+            position: relative;
+        }
+
+        .grid {
+            display: grid;
+            /* grid-template-columns será definido via JS com --num-cols */
+            gap: 8px;
+            width: 100%;
+            max-width: 500px; /* Limita a largura da grade */
+            margin-bottom: 20px;
+        }
+
+        /* Define o número de colunas baseado na variável CSS */
+        .grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
+        .grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
+        .grid[data-cols="5"] { grid-template-columns: repeat(5, 1fr); }
+
+
+        .cell {
+            width: 80px; /* Tamanho base */
+            height: 80px;
+            background-color: #424242; /* Cinza médio */
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: background-color 0.1s, transform 0.1s, opacity 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+            border: 2px solid #616161;
+            color: transparent; /* Esconde o texto/ícone inicialmente */
+            box-sizing: border-box; /* Inclui padding e border na largura/altura */
+        }
+
+        /* Ajustes para células em grids maiores/menores */
+        .grid[data-cols="4"] .cell { width: 70px; height: 70px; font-size: 2.8em; }
+        .grid[data-cols="3"] .cell { width: 90px; height: 90px; font-size: 3.2em; }
+
+
+        /* Ajuste para que as células se redimensionem em telas menores */
+        @media (max-width: 480px) {
+            .cell {
+                width: 50px;
+                height: 50px;
+                font-size: 2em;
+            }
+            .grid {
+                max-width: 100%; /* Ajusta a largura máxima da grade */
+            }
+            .grid[data-cols="3"] .cell { width: 70px; height: 70px; font-size: 2.5em; }
+            .grid[data-cols="4"] .cell { width: 55px; height: 55px; font-size: 2.2em; }
+        }
+
+
+        .cell.revealed {
+            cursor: default;
+            background-color: #757575; /* Cinza claro quando revelado */
+        }
+
+        .cell.ball {
+            background-color: #a5d6a7; /* Verde claro para bola */
+            color: #000;
+            font-size: 2.5em; /* Ajuste para ícone da bola */
+        }
+
+        .cell.bomb {
+            background-color: #ef9a9a; /* Vermelho claro para bomba */
+            color: #000;
+            font-size: 2.5em; /* Ajuste para ícone da bomba */
+        }
+        
+        .cell.disabled {
+            opacity: 0.5;
+            pointer-events: none; /* Impede cliques */
+        }
+        .cell.current-level {
+            opacity: 1;
+            pointer-events: auto; /* Permite cliques */
+        }
+
+
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .bet-input {
+            width: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #7f8c8d;
+            background-color: #555;
+            color: #ecf0f1;
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .field-select-container { /* Renomeado para clareza */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap; 
+            justify-content: center;
+        }
+
+        .field-select-container label {
+            font-size: 1.1em;
+            color: #bdc3c7;
+        }
+
+        #fieldSize { /* Mantendo ID para JS */
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #7f8c8d;
+            background-color: #555;
+            color: #ecf0f1;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap; 
+        }
+
+        .action-buttons button {
+            padding: 12px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            flex-grow: 1; 
+            max-width: 180px; 
+        }
+
+        #betButton {
+            background-color: #27ae60; 
+        }
+        #betButton:hover {
+            background-color: #2ecc71;
+        }
+        #betButton:disabled {
+            background-color: #a5d6a7;
+            cursor: not-allowed;
+        }
+
+        #cashOutButton {
+            background-color: #f39c12; 
+        }
+        #cashOutButton:hover {
+            background-color: #e67e22;
+        }
+        #cashOutButton:disabled {
+            background-color: #fabc6b;
+            cursor: not-allowed;
+        }
+
+        .info-display {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #34495e;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            color: #bdc3c7;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .info-display span {
+            font-weight: bold;
+            color: #ecf0f1;
+            flex: 1 1 45%; 
+        }
+        .info-display span:last-child {
+            text-align: right; 
+        }
+
+        .message-display {
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffeb3b;
+            min-height: 1.2em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .back-button {
+            margin-top: 40px;
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Confetti for Goal */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            opacity: 0;
+            animation: fall 3s ease-out forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Goal Game</h1>
+
+    <div id="balance">Saldo: <span id="currentBalance">0.00</span> BRL</div>
+
+    <div class="game-container">
+        <div class="grid" id="gameGrid"></div>
+
+        <div class="controls-panel">
+            <input type="number" id="betAmount" class="bet-input" value="1.00" min="0.50" step="0.50">
+
+            <div class="field-select-container">
+                <label for="fieldSize">Campo:</label>
+                <select id="fieldSize">
+                    <option value="small">Small (3x4)</option>
+                    <option value="medium">Medium (4x7)</option>
+                    <option value="large">Large (5x10)</option>
+                </select>
+            </div>
+
+            <div class="info-display">
+                <span>Ganhos Potenciais: <span id="potentialPayout">0.00x</span></span>
+                <span>Próximo Gol: <span id="nextGoalPayout">0.00x</span></span>
+            </div>
+
+            <div class="action-buttons">
+                <button id="betButton">Começar Partida</button>
+                <button id="cashOutButton" disabled>Sacar (0.00)</button>
+            </div>
+            <div class="message-display" id="gameMessage"></div>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-button">Voltar para a Página Principal</a>
+
+    <div id="confetti-container"></div>
+
+    <script>
+        const currentBalanceDisplay = document.getElementById('currentBalance');
+        const gameGrid = document.getElementById('gameGrid');
+        const betAmountInput = document.getElementById('betAmount');
+        const fieldSizeSelect = document.getElementById('fieldSize');
+        const betButton = document.getElementById('betButton');
+        const cashOutButton = document.getElementById('cashOutButton');
+        const potentialPayoutDisplay = document.getElementById('potentialPayout');
+        const nextGoalPayoutDisplay = document.getElementById('nextGoalPayout');
+        const gameMessageDisplay = document.getElementById('gameMessage');
+        const confettiContainer = document.getElementById('confetti-container');
+
+        let playerBalance = 0;
+        let gameActive = false;
+        let currentBet = 0;
+        let currentPayoutMultiplier = 1.00; // Começa em 1x
+        
+        let numRows = 0; 
+        let numCols = 0; 
+        
+        let currentLevel = 0; // O nível atual que o jogador está jogando (fileira atual)
+        // Alterado: bombPositions agora guarda a posição da BOMBA em cada fileira
+        let bombPositions = []; 
+
+        // Definições dos campos (linhas x colunas)
+        const fieldDefinitions = {
+            small: { rows: 4, cols: 3 },
+            medium: { rows: 7, cols: 4 },
+            large: { rows: 10, cols: 5 }
+        };
+
+        // Sons
+        const clickSound = new Audio('click_sound.mp3'); 
+        const winSound = new Audio('slot_win.mp3'); // Para quando acerta uma bola (não bomba)
+        const loseSound = new Audio('slot_lose.mp3'); // Para quando acerta uma bomba
+        const cashOutSound = new Audio('cash_out.mp3'); 
+
+        function saveBalance() {
+            localStorage.setItem('minesPlayerBalance', playerBalance.toFixed(2));
+        }
+
+        function loadBalance() {
+            const savedBalance = localStorage.getItem('minesPlayerBalance');
+            if (savedBalance !== null) {
+                playerBalance = parseFloat(savedBalance);
+            } else {
+                playerBalance = 20.00; // Saldo inicial
+            }
+        }
+
+        function updateBalanceDisplay() {
+            currentBalanceDisplay.textContent = playerBalance.toFixed(2);
+            saveBalance();
+        }
+
+        function calculatePayouts() {
+            const selectedField = fieldSizeSelect.value;
+            const { rows, cols } = fieldDefinitions[selectedField];
+            
+            // O multiplicador para cada nível é baseado em (total de células / número de bolas)
+            // Número de bolas = cols - 1
+            const multiplierPerLevel = cols / (cols - 1); 
+
+            // "Ganhos Potenciais" seria o multiplicador final se todas as bolas forem acertadas
+            let finalPotentialMultiplier = 1.00;
+            for(let i = 0; i < rows; i++) {
+                finalPotentialMultiplier *= multiplierPerLevel;
+            }
+            potentialPayoutDisplay.textContent = `${finalPotentialMultiplier.toFixed(2)}x`;
+
+            // "Próximo Gol"
+            if (gameActive && currentLevel < rows) {
+                nextGoalPayoutDisplay.textContent = `${(currentPayoutMultiplier * multiplierPerLevel).toFixed(2)}x`;
+            } else if (!gameActive) {
+                // Antes de começar o jogo, o "Próximo Gol" é o multiplicador da primeira fileira
+                nextGoalPayoutDisplay.textContent = `${multiplierPerLevel.toFixed(2)}x`;
+            } else {
+                nextGoalPayoutDisplay.textContent = '---'; // Jogo finalizado
+            }
+
+            // Atualiza o texto do botão de sacar
+            if (gameActive && currentLevel > 0) { // Pode sacar após o primeiro acerto
+                cashOutButton.textContent = `Sacar (${(currentBet * currentPayoutMultiplier).toFixed(2)})`;
+            } else {
+                cashOutButton.textContent = `Sacar (0.00)`;
+            }
+        }
+
+        function startGame() {
+            const betAmount = parseFloat(betAmountInput.value);
+            if (isNaN(betAmount) || betAmount <= 0) {
+                gameMessageDisplay.textContent = "Aposta inválida!";
+                return;
+            }
+            if (betAmount > playerBalance) {
+                gameMessageDisplay.textContent = "Saldo insuficiente!";
+                return;
+            }
+
+            playerBalance -= betAmount;
+            updateBalanceDisplay();
+            currentBet = betAmount;
+            currentPayoutMultiplier = 1.00; // Reseta para 1x no início
+            currentLevel = 0; // Começa na primeira fileira (nível 0)
+            gameActive = true;
+            gameMessageDisplay.textContent = "Jogo iniciado! Selecione uma célula na primeira fileira.";
+            
+            betButton.disabled = true;
+            betAmountInput.disabled = true;
+            fieldSizeSelect.disabled = true; // Desabilita o seletor de campo
+            cashOutButton.disabled = true; 
+            cashOutButton.textContent = `Sacar (0.00)`;
+
+            // Define numRows e numCols com base na seleção
+            const selectedField = fieldSizeSelect.value;
+            numRows = fieldDefinitions[selectedField].rows;
+            numCols = fieldDefinitions[selectedField].cols;
+
+            generateGrid();
+            // Alterado: Chama placeBombs() para colocar UMA bomba por fileira
+            placeBombs(); 
+            enableCurrentLevelCells(); // Habilita apenas as células da primeira fileira
+            calculatePayouts(); // Recalcula payouts para o início do jogo
+        }
+
+        function generateGrid() {
+            gameGrid.innerHTML = '';
+            // Define o número de colunas para o CSS Grid
+            gameGrid.dataset.cols = numCols; // Usar data-attribute para o CSS
+            gameGrid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`; // Define as linhas
+
+            for (let r = 0; r < numRows; r++) {
+                for (let c = 0; c < numCols; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r; // Atribui a fileira
+                    cell.dataset.col = c; // Atribui a coluna
+                    cell.addEventListener('click', handleCellClick);
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        // Alterado: Função para colocar UMA BOMBA por fileira
+        function placeBombs() {
+            bombPositions = [];
+            for (let r = 0; r < numRows; r++) {
+                // Para cada fileira, escolhe uma coluna aleatória para a BOMBA (0 a numCols-1)
+                bombPositions[r] = Math.floor(Math.random() * numCols); 
+            }
+        }
+
+        function enableCurrentLevelCells() {
+            const cells = gameGrid.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                if (row === currentLevel && !cell.classList.contains('revealed')) {
+                    cell.classList.add('current-level'); // Adiciona classe para estilo/interação
+                    cell.classList.remove('disabled');
+                } else {
+                    cell.classList.add('disabled'); // Desabilita outras células
+                    cell.classList.remove('current-level');
+                }
+            });
+        }
+
+        // Alterado: revealRow agora considera que a célula clicada é uma BOLA ou a BOMBA
+        function revealRow(rowToReveal, showAllBombs = false) {
+            const cellsInRow = gameGrid.querySelectorAll(`.cell[data-row="${rowToReveal}"]`);
+            cellsInRow.forEach(cell => {
+                const col = parseInt(cell.dataset.col);
+                if (col === bombPositions[rowToReveal]) { // Se a coluna é a posição da bomba
+                    cell.classList.add('bomb');
+                    cell.innerHTML = '💥';
+                } else { // Se não é a bomba, é uma bola
+                    if (showAllBombs || cell.classList.contains('revealed')) { 
+                        cell.classList.add('ball');
+                        cell.innerHTML = '⚽';
+                    }
+                }
+                cell.classList.add('revealed'); 
+                cell.classList.add('disabled'); // Desabilita todas as células desta linha
+                cell.classList.remove('current-level');
+                cell.removeEventListener('click', handleCellClick);
+            });
+        }
+
+        function handleCellClick(event) {
+            if (!gameActive) return;
+
+            const cell = event.target;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+
+            // Verifica se é a fileira atual e se a célula ainda não foi revelada
+            if (row !== currentLevel || cell.classList.contains('revealed')) {
+                return; 
+            }
+
+            clickSound.currentTime = 0;
+            clickSound.play();
+
+            cell.classList.add('revealed');
+
+            // Alterado: Lógica para acertar BOMBA ou BOLA
+            if (col === bombPositions[row]) {
+                // Acertou a BOMBA
+                cell.classList.add('bomb');
+                cell.innerHTML = '💥';
+                gameMessageDisplay.textContent = "BOOM! Você atingiu uma bomba. Fim de jogo.";
+                loseSound.currentTime = 0;
+                loseSound.play();
+                endGame(false);
+            } else {
+                // Acertou a BOLA (não é a bomba)
+                cell.classList.add('ball');
+                cell.innerHTML = '⚽';
+                winSound.currentTime = 0;
+                winSound.play();
+
+                const selectedField = fieldSizeSelect.value;
+                const { cols } = fieldDefinitions[selectedField];
+                // Multiplicador baseado na chance de acertar uma bola (cols - 1 chances em cols)
+                currentPayoutMultiplier *= (cols / (cols - 1)); 
+                
+                gameMessageDisplay.textContent = `Gol! Multiplicador atual: ${currentPayoutMultiplier.toFixed(2)}x. Prossiga para a próxima fileira!`;
+                cashOutButton.disabled = false; // Habilita o saque
+                
+                // Revela toda a linha atual após o acerto, mostrando as outras bolas e a bomba
+                revealRow(row); 
+
+                currentLevel++; // Avança para a próxima fileira
+                
+                if (currentLevel < numRows) {
+                    enableCurrentLevelCells(); // Habilita células da nova fileira
+                    calculatePayouts(); // Atualiza payouts
+                } else {
+                    // Todas as bolas foram encontradas (todas as fileiras foram passadas sem acertar bomba)!
+                    gameMessageDisplay.textContent = `PARABÉNS! Você encontrou todas as ${numRows} bolas! Você ganhou R$ ${(currentBet * currentPayoutMultiplier).toFixed(2)}.`;
+                    endGame(true);
+                }
+            }
+        }
+
+        function endGame(won) {
+            gameActive = false;
+            betButton.disabled = false;
+            betAmountInput.disabled = false;
+            fieldSizeSelect.disabled = false; // Reabilita o seletor de campo
+            cashOutButton.disabled = true;
+
+            // Revela todas as bolas e bombas na grade ao final do jogo
+            for (let r = 0; r < numRows; r++) {
+                revealRow(r, true); // Revela a bomba e as bolas restantes de cada linha
+            }
+
+            if (won && currentPayoutMultiplier > 1.00) { // Garante que houve ganhos
+                playerBalance += (currentBet * currentPayoutMultiplier);
+                updateBalanceDisplay();
+                cashOutSound.currentTime = 0;
+                cashOutSound.play();
+                launchConfetti();
+            } else if (!won) {
+                // Se perdeu, o saldo já foi debitado no início, não há ganhos.
+            }
+            
+            cashOutButton.textContent = `Sacar (0.00)`; // Reseta o texto
+            calculatePayouts(); // Atualiza payouts para estado inicial
+        }
+
+        function cashOut() {
+            if (!gameActive || currentLevel === 0) return; // Só pode sacar se o jogo está ativo e pelo menos um gol foi feito
+
+            const winnings = currentBet * currentPayoutMultiplier;
+            gameMessageDisplay.textContent = `Você sacou R$ ${winnings.toFixed(2)}!`;
+            cashOutSound.currentTime = 0;
+            cashOutSound.play();
+            launchConfetti();
+            endGame(true); // Termina o jogo com vitória (sacou)
+        }
+
+        function launchConfetti() {
+            const colors = ['#f44336', '#4caf50', '#2196f3', '#ffeb3b', '#9c27b0', '#ff9800'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${Math.random() * 2 + 3}s`;
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                confettiContainer.appendChild(confetti);
+
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+
+        // Initial setup
+        loadBalance();
+        updateBalanceDisplay();
+        fieldSizeSelect.addEventListener('change', calculatePayouts); // Adiciona listener para o seletor de campo
+        betButton.addEventListener('click', startGame);
+        cashOutButton.addEventListener('click', cashOut);
+        
+        // Carrega os sons para evitar atrasos na primeira execução
+        clickSound.load();
+        winSound.load();
+        loseSound.load();
+        cashOutSound.load();
+
+        // Inicializa o jogo com as configurações padrão do campo (Small)
+        // Isso também chama calculatePayouts() indiretamente
+        const initialField = fieldSizeSelect.value;
+        numRows = fieldDefinitions[initialField].rows;
+        numCols = fieldDefinitions[initialField].cols;
+        generateGrid(); // Gera a grade inicial
+        calculatePayouts(); // Calcula payouts iniciais
+    </script>
+</body>
+</html>

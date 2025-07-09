@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cassino Online - Página Principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Press Start 2P', cursive;
             background-color: #1e1e2f;
             color: #fff;
             display: flex;
@@ -23,6 +24,19 @@
             color: #ffc107;
             margin-bottom: 40px;
             font-size: 2.5em;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        #balance {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 30px;
+            background-color: #33334d;
+            padding: 10px 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+            border: 2px solid #ff9900;
         }
 
         .game-list {
@@ -44,6 +58,7 @@
             align-items: center;
             text-decoration: none;
             color: #fff;
+            font-family: 'Press Start 2P', cursive;
         }
 
         .game-card:hover {
@@ -60,14 +75,86 @@
         }
 
         .game-card h2 {
-            font-size: 1.8em;
+            font-size: 1.4em;
             margin-bottom: 10px;
             color: #1aff00;
         }
 
         .game-card p {
-            font-size: 1em;
+            font-size: 0.9em;
             color: #ccc;
+        }
+
+        /* Estilo para o botão de bônus diário */
+        #dailyBonusButton {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-family: 'Press Start 2P', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        #dailyBonusButton:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        #dailyBonusButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #bonusMessage {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #ffffff;
+            min-height: 1.2em;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* Estilo para o botão de bônus de compartilhamento */
+        #shareBonusButton {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-family: 'Press Start 2P', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        #shareBonusButton:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        #shareBonusButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #shareBonusMessage {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #ffffff;
+            min-height: 1.2em;
+            font-family: 'Press Start 2P', cursive;
         }
 
         @media (max-width: 768px) {
@@ -81,11 +168,23 @@
             h1 {
                 font-size: 2em;
             }
+            #balance {
+                font-size: 1.5em;
+            }
+            #dailyBonusButton, #shareBonusButton {
+                font-size: 1em;
+                padding: 12px 25px;
+            }
+            #bonusMessage, #shareBonusMessage {
+                font-size: 0.8em;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Bem-vindo ao Cassino Online!</h1>
+
+    <div id="balance">Saldo: <span id="currentBalance">0.00</span> BRL</div>
 
     <div class="game-list">
         <a href="mines.html" class="game-card">
@@ -106,8 +205,151 @@
             <p>Aposte no número e a sorte está lançada!</p>
         </a>
 
+        <a href="goal.html" class="game-card">
+            <img src="goal_icon.png" alt="Goal Icon">
+            <h2>Goal</h2>
+            <p>Marque um gol e evite a bomba!</p>
+        </a>
     </div>
 
+    <button id="dailyBonusButton">Reivindicar Bônus Diário</button>
+    <div id="bonusMessage"></div>
+
+    <button id="shareBonusButton">Compartilhar e Ganhar (WhatsApp)</button>
+    <div id="shareBonusMessage"></div>
+
     <p style="margin-top: 50px; color: #aaa;">Selecione um jogo para começar a diversão!</p>
+
+    <script>
+        const currentBalanceDisplay = document.getElementById('currentBalance');
+        const dailyBonusButton = document.getElementById('dailyBonusButton');
+        const bonusMessageDisplay = document.getElementById('bonusMessage');
+
+        const shareBonusButton = document.getElementById('shareBonusButton');
+        const shareBonusMessageDisplay = document.getElementById('shareBonusMessage');
+
+        let playerBalance = 0;
+        const DAILY_BONUS_AMOUNT = 5.00;
+        const SHARE_BONUS_AMOUNT = 3.00;
+        const SHARE_BONUS_COOLDOWN_HOURS = 12;
+
+        function saveBalance() {
+            localStorage.setItem('minesPlayerBalance', playerBalance.toFixed(2));
+        }
+
+        function loadBalance() {
+            const savedBalance = localStorage.getItem('minesPlayerBalance');
+            if (savedBalance !== null) {
+                playerBalance = parseFloat(savedBalance);
+            } else {
+                playerBalance = 20.00;
+            }
+        }
+
+        function updateBalanceDisplay() {
+            currentBalanceDisplay.textContent = playerBalance.toFixed(2);
+            saveBalance();
+        }
+
+        // Funções do Bônus Diário
+        function claimDailyBonus() {
+            const lastClaimTime = localStorage.getItem('lastBonusClaimTime');
+            const now = new Date().getTime();
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (lastClaimTime && (now - parseInt(lastClaimTime) < oneDay)) {
+                return;
+            }
+
+            playerBalance += DAILY_BONUS_AMOUNT;
+            updateBalanceDisplay();
+            localStorage.setItem('lastBonusClaimTime', now.toString());
+            bonusMessageDisplay.textContent = `Bônus de R$ ${DAILY_BONUS_AMOUNT.toFixed(2)} reivindicado!`;
+            dailyBonusButton.disabled = true;
+            setTimeout(updateBonusButtonState, oneDay + 1000);
+        }
+
+        function updateBonusButtonState() {
+            const lastClaimTime = localStorage.getItem('lastBonusClaimTime');
+            const now = new Date().getTime();
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (lastClaimTime && (now - parseInt(lastClaimTime) < oneDay)) {
+                dailyBonusButton.disabled = true;
+                const timeLeft = oneDay - (now - parseInt(lastClaimTime));
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                bonusMessageDisplay.textContent = `Próximo bônus em: ${hours}h ${minutes}m ${seconds}s`;
+                clearTimeout(window.dailyBonusTimeoutId);
+                window.dailyBonusTimeoutId = setTimeout(updateBonusButtonState, timeLeft + 1000);
+            } else {
+                dailyBonusButton.disabled = false;
+                bonusMessageDisplay.textContent = "Bônus diário disponível!";
+            }
+        }
+
+        // NOVO: Funções para o Bônus de Compartilhamento (AJUSTADA!)
+        function claimShareBonus() {
+            const lastShareClaimTime = localStorage.getItem('lastShareBonusClaimTime');
+            const now = new Date().getTime();
+            const cooldownTime = SHARE_BONUS_COOLDOWN_HOURS * 60 * 60 * 1000;
+
+            if (lastShareClaimTime && (now - parseInt(lastShareClaimTime) < cooldownTime)) {
+                // Ainda não passou o tempo de cooldown
+                return;
+            }
+            
+            // Texto e URL do site para compartilhar
+            const shareText = "Confira este incrível jogo de cassino online! Jogue agora e divirta-se:";
+            const siteUrl = window.location.href; // Pega a URL atual do seu site
+
+            // URL para compartilhamento no WhatsApp
+            // EncodeURIComponent é importante para que os caracteres especiais funcionem corretamente na URL
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + siteUrl)}`;
+            
+            // Abre a janela de compartilhamento em uma nova aba/janela
+            window.open(whatsappUrl, '_blank');
+
+            // Concede o bônus imediatamente após abrir a janela
+            playerBalance += SHARE_BONUS_AMOUNT;
+            updateBalanceDisplay();
+            localStorage.setItem('lastShareBonusClaimTime', now.toString());
+            shareBonusMessageDisplay.textContent = `Abra o WhatsApp para compartilhar! Bônus de R$ ${SHARE_BONUS_AMOUNT.toFixed(2)} recebido!`;
+            shareBonusButton.disabled = true;
+            
+            // Agenda a reativação do botão após o cooldown
+            setTimeout(updateShareBonusButtonState, cooldownTime + 1000);
+        }
+
+        function updateShareBonusButtonState() {
+            const lastShareClaimTime = localStorage.getItem('lastShareBonusClaimTime');
+            const now = new Date().getTime();
+            const cooldownTime = SHARE_BONUS_COOLDOWN_HOURS * 60 * 60 * 1000;
+
+            if (lastShareClaimTime && (now - parseInt(lastShareClaimTime) < cooldownTime)) {
+                shareBonusButton.disabled = true;
+                const timeLeft = cooldownTime - (now - parseInt(lastShareClaimTime));
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                shareBonusMessageDisplay.textContent = `Próximo bônus de compartilhamento em: ${hours}h ${minutes}m ${seconds}s`;
+                clearTimeout(window.shareBonusTimeoutId);
+                window.shareBonusTimeoutId = setTimeout(updateShareBonusButtonState, timeLeft + 1000);
+            } else {
+                shareBonusButton.disabled = false;
+                shareBonusMessageDisplay.textContent = "Compartilhe e ganhe bônus disponível!";
+            }
+        }
+
+        // Initial setup
+        loadBalance();
+        updateBalanceDisplay();
+        dailyBonusButton.addEventListener('click', claimDailyBonus);
+        shareBonusButton.addEventListener('click', claimShareBonus);
+
+        updateBonusButtonState();
+        updateShareBonusButtonState();
+    </script>
 </body>
 </html>
