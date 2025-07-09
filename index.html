@@ -172,8 +172,6 @@
         .or-divider::before { left: 0; }
         .or-divider::after { right: 0; }
 
-        /* As classes para o botão do Google foram removidas daqui */
-
         .message-display {
             margin-top: 20px;
             font-size: 1.1em;
@@ -247,7 +245,7 @@
         .go-to-games-btn { /* Novo botão */
             background: linear-gradient(145deg, #ffeb3b, #fbc02d); /* Amarelo */
             color: #21213b;
-            border-bottom: 5_px solid #f9a825;
+            border-bottom: 5px solid #f9a825; /* Corrigido de 5_px para 5px */
         }
         .go-to-games-btn:hover {
             background: linear-gradient(145deg, #ffe082, #ffeb3b);
@@ -266,7 +264,6 @@
             .auth-toggle button { padding: 10px 18px; font-size: 1em; }
             .auth-form input { width: calc(100% - 20px); font-size: 1em; padding: 10px; }
             .auth-form button { font-size: 1em; padding: 12px 20px; }
-            /* .google-login-btn foi removido */
             .message-display { font-size: 1em; }
             .logged-in-message { font-size: 1.2em; }
             .logged-in-controls button { font-size: 1em; padding: 12px 20px; }
@@ -312,15 +309,17 @@
     <script type="module">
         // Importa as funções necessárias do Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        // Removido GoogleAuthProvider e signInWithPopup
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // REMOVIDA importação de Firestore aqui para garantir que ele não seja usado neste arquivo
+        // import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 
         // SUA CONFIGURAÇÃO DO FIREBASE (COLE AQUI O OBJETO COPIADO DO CONSOLE DO FIREBASE)
         const firebaseConfig = {
           apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0",
           authDomain: "minesr-c4cdd.firebaseapp.com",
           projectId: "minesr-c4cdd",
-          storageBucket: "minesr-c4cdd.firebasestorage.appT",
+          storageBucket: "minesr-c4cdd.firebasestorage.app", // Corrigido de "appT" para "app"
           messagingSenderId: "23212779178",
           appId: "1:232127791789:web:b9de6157faabb44f357c2"
         };
@@ -328,6 +327,8 @@
         // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app); // Obtém a instância de autenticação
+        // REMOVIDA inicialização do Firestore aqui
+        // const db = getFirestore(app);
 
         // Referências aos elementos HTML
         const authSection = document.getElementById('authSection');
@@ -342,9 +343,7 @@
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         const authMessageDisplay = document.getElementById('authMessage');
-        // Removido a referência ao botão do Google Login
-        // const googleLoginBtn = document.getElementById('googleLoginBtn'); 
-
+        
         const loginEmailInput = document.getElementById('loginEmail');
         const loginPasswordInput = document.getElementById('loginPassword');
         const registerEmailInput = document.getElementById('registerEmail');
@@ -479,34 +478,6 @@
             }
         });
 
-        // O bloco de Event listener para o botão de Login com Google foi removido daqui
-        /*
-        googleLoginBtn.addEventListener('click', async () => {
-            displayAuthMessage("Redirecionando para o login com Google...", "info");
-            const provider = new GoogleAuthProvider();
-
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                console.log("Login com Google bem-sucedido:", user.displayName || user.email);
-                displayAuthMessage(`Bem-vindo, ${user.displayName || user.email}! Redirecionando para os jogos...`, "success");
-                setTimeout(() => {
-                    window.location.href = 'games.html';
-                }, 1500);
-
-            } catch (error) {
-                console.error("Erro ao fazer login com Google:", error.code, error.message);
-                let errorMessage = "Erro ao fazer login com Google. Tente novamente.";
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorMessage = 'Login com Google cancelado.';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    errorMessage = 'A janela de login já está aberta.';
-                }
-                displayAuthMessage(errorMessage, "error");
-            }
-        });
-        */
-
         // Event listener para o botão "Ir para os Jogos" na seção logada
         goToGamesBtn.addEventListener('click', () => {
             window.location.href = 'games.html'; // Redireciona para a página de seleção de jogos
@@ -532,6 +503,7 @@
                 loggedInSection.style.display = 'flex'; // Mostra a seção de logado
                 displayAuthMessage(''); // Limpa mensagens da seção de login
                 console.log("Usuário logado:", user.email);
+                // Se o usuário está logado e está na página de login/registro, redireciona para games.html
                 if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
                     window.location.href = 'games.html';
                 }
