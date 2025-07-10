@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino - Login/Registro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a1a2e; /* Azul escuro */
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            background-image: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        h1 {
+            color: #ffeb3b; /* Amarelo vibrante */
+            margin-bottom: 30px;
+            font-size: 3.5em;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 235, 59, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .auth-container {
+            background-color: #21213b;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            border: 5px solid #ff9800; /* Laranja para borda do container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 500px;
+            width: 95%;
+            position: relative;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auth-toggle button {
+            background-color: #3f51b5; /* Azul */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-toggle button:hover {
+            background-color: #536dfe;
+            transform: translateY(-2px);
+        }
+
+        .auth-toggle button.active {
+            background-color: #ffeb3b; /* Amarelo quando ativo */
+            color: #21213b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+            transform: scale(1.05);
+        }
+
+        .auth-form {
+            width: 100%;
+            display: none; /* Escondido por padrão, JavaScript vai mostrar */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form.active {
+            display: flex; /* Ativa o formulário */
+        }
+
+        .auth-form input[type="email"],
+        .auth-form input[type="password"] {
+            width: calc(100% - 24px); /* Ajusta para padding */
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #7f8c8d;
+            background-color: #34495e;
+            color: #ecf0f1;
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-form input:focus {
+            border-color: #ffeb3b;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 235, 59, 0.3);
+        }
+
+        .auth-form button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .auth-form button.login-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C); /* Verde */
+            border-bottom: 5px solid #1B5E20;
+        }
+        .auth-form button.login-btn:hover {
+            background: linear-gradient(145deg, #66BB6A, #4CAF50);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button.register-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9); /* Azul */
+            border-bottom: 5px solid #247bb2;
+        }
+        .auth-form button.register-btn:hover {
+            background: linear-gradient(145deg, #2980b9, #247bb2);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .auth-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .or-divider {
+            margin: 20px 0;
+            position: relative;
+            width: 80%;
+            text-align: center;
+            color: #bbb;
+        }
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #555;
+        }
+        .or-divider::before { left: 0; }
+        .or-divider::after { right: 0; }
+
+        .message-display {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            transition: color 0.3s ease-out;
+        }
+        .message-display.error {
+            color: #e74c3c;
+        }
+        .message-display.success {
+            color: #2ecc71;
+        }
+        .message-display.info {
+            color: #3498db;
+        }
+
+        /* Novas classes para o estado logado */
+        .logged-in-container {
+            background-color: #21213b;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            border: 5px solid #ff9800; /* Laranja para borda do container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 500px;
+            width: 95%;
+            position: relative;
+        }
+
+        .logged-in-message {
+            font-size: 1.5em;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+        .logged-in-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        .logged-in-controls button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .logout-btn {
+            background: linear-gradient(145deg, #f44336, #d32f2f); /* Vermelho */
+            border-bottom: 5px solid #b71c1c;
+        }
+        .logout-btn:hover {
+            background: linear-gradient(145deg, #ef5350, #f44336);
+        }
+        .logout-btn:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid #b71c1c;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .go-to-games-btn { /* Novo botão */
+            background: linear-gradient(145deg, #ffeb3b, #fbc02d); /* Amarelo */
+            color: #21213b;
+            border-bottom: 5px solid #f9a825; /* Corrigido de 5_px para 5px */
+        }
+        .go-to-games-btn:hover {
+            background: linear-gradient(145deg, #ffe082, #ffeb3b);
+        }
+        .go-to-games-btn:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid #f9a825;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2em; letter-spacing: 2px; }
+            .auth-container, .logged-in-container { padding: 30px; gap: 20px; }
+            .auth-toggle button { padding: 10px 18px; font-size: 1em; }
+            .auth-form input { width: calc(100% - 20px); font-size: 1em; padding: 10px; }
+            .auth-form button { font-size: 1em; padding: 12px 20px; }
+            .message-display { font-size: 1em; }
+            .logged-in-message { font-size: 1.2em; }
+            .logged-in-controls button { font-size: 1em; padding: 12px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Casino Online</h1>
+
+    <div class="auth-wrapper">
+        <div class="auth-container" id="authSection">
+            <div class="auth-toggle">
+                <button id="loginTab" class="active">Login</button>
+                <button id="registerTab">Registrar</button>
+            </div>
+
+            <form id="loginForm" class="auth-form active">
+                <input type="email" id="loginEmail" placeholder="E-mail" required>
+                <input type="password" id="loginPassword" placeholder="Senha" required>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+
+            <form id="registerForm" class="auth-form">
+                <input type="email" id="registerEmail" placeholder="E-mail" required>
+                <input type="password" id="registerPassword" placeholder="Senha" required>
+                <input type="password" id="confirmPassword" placeholder="Confirmar Senha" required>
+                <button type="submit" class="register-btn">Registrar</button>
+            </form>
+
+            <div class="message-display" id="authMessage"></div>
+        </div>
+
+        <div class="logged-in-container" id="loggedInSection" style="display: none;">
+            <p class="logged-in-message">Bem-vindo(a), <span id="userEmailDisplay"></span>!</p>
+            <div class="logged-in-controls">
+                <button id="goToGamesBtn" class="go-to-games-btn">Ir para os Jogos</button>
+                <button id="logoutBtn" class="logout-btn">Sair</button>
+            </div>
+            <div class="message-display" id="loggedInMessage"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importa as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // REMOVIDA importação de Firestore aqui para garantir que ele não seja usado neste arquivo
+        // import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+        // SUA CONFIGURAÇÃO DO FIREBASE (COLE AQUI O OBJETO COPIADO DO CONSOLE DO FIREBASE)
+        const firebaseConfig = {
+          apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0",
+          authDomain: "minesr-c4cdd.firebaseapp.com",
+          projectId: "minesr-c4cdd",
+          storageBucket: "minesr-c4cdd.firebasestorage.app", // Corrigido de "appT" para "app"
+          messagingSenderId: "23212779178",
+          appId: "1:232127791789:web:b9de6157faabb44f357c2"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); // Obtém a instância de autenticação
+        // REMOVIDA inicialização do Firestore aqui
+        // const db = getFirestore(app);
+
+        // Referências aos elementos HTML
+        const authSection = document.getElementById('authSection');
+        const loggedInSection = document.getElementById('loggedInSection');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const goToGamesBtn = document.getElementById('goToGamesBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loggedInMessageDisplay = document.getElementById('loggedInMessage');
+
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authMessageDisplay = document.getElementById('authMessage');
+        
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        
+        function displayAuthMessage(message, type = '') {
+            authMessageDisplay.textContent = message;
+            authMessageDisplay.className = 'message-display'; // Reset classes
+            if (type) {
+                authMessageDisplay.classList.add(type);
+            }
+        }
+
+        function displayLoggedInMessage(message, type = '') {
+            loggedInMessageDisplay.textContent = message;
+            loggedInMessageDisplay.className = 'message-display'; // Reset classes
+            if (type) {
+                loggedInMessageDisplay.classList.add(type);
+            }
+        }
+
+        // Função para alternar entre login e registro
+        function showForm(formId) {
+            loginTab.classList.remove('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.remove('active');
+            registerForm.classList.remove('active');
+            displayAuthMessage(''); // Limpa a mensagem
+
+            if (formId === 'login') {
+                loginTab.classList.add('active');
+                loginForm.classList.add('active');
+            } else {
+                registerTab.classList.add('active');
+                registerForm.classList.add('active');
+            }
+        }
+
+        loginTab.addEventListener('click', () => showForm('login'));
+        registerTab.addEventListener('click', () => showForm('register'));
+
+        // Event listener para o formulário de Login
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+
+            displayAuthMessage("Tentando fazer login...", "info");
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log("Usuário logado:", user.email);
+                displayAuthMessage(`Login bem-sucedido! Redirecionando para os jogos...`, "success");
+                setTimeout(() => {
+                    window.location.href = 'games.html'; // Redireciona para a nova página de seleção de jogos
+                }, 1500);
+
+            } catch (error) {
+                console.error("Erro de login:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao fazer login.";
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Sua conta foi desativada.';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = 'E-mail ou senha incorretos.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao fazer login. Verifique seu e-mail e senha.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        // Event listener para o formulário de Registro
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                displayAuthMessage("As senhas não coincidem.", "error");
+                return;
+            }
+            if (password.length < 6) { // Firebase exige no mínimo 6 caracteres
+                displayAuthMessage("A senha deve ter pelo menos 6 caracteres.", "error");
+                return;
+            }
+
+            displayAuthMessage("Tentando registrar...", "info");
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log("Usuário registrado:", user.email);
+                displayAuthMessage("Registro bem-sucedido! Redirecionando para os jogos...", "success");
+                setTimeout(() => {
+                    window.location.href = 'games.html'; // Redireciona para a nova página de seleção de jogos
+                }, 1500);
+
+            } catch (error) {
+                console.error("Erro de registro:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao registrar.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está em uso.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'A senha é muito fraca. Escolha uma senha mais forte.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao registrar. Tente novamente.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        // Event listener para o botão "Ir para os Jogos" na seção logada
+        goToGamesBtn.addEventListener('click', () => {
+            window.location.href = 'games.html'; // Redireciona para a página de seleção de jogos
+        });
+
+        // Event listener para o botão "Sair" (Logout)
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                displayAuthMessage("Você foi desconectado.", "info");
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+                displayLoggedInMessage("Erro ao tentar sair. Tente novamente.", "error");
+            }
+        });
+
+        // Ouve mudanças no estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado
+                userEmailDisplay.textContent = user.email || user.displayName;
+                authSection.style.display = 'none'; // Esconde formulários de login/registro
+                loggedInSection.style.display = 'flex'; // Mostra a seção de logado
+                displayAuthMessage(''); // Limpa mensagens da seção de login
+                console.log("Usuário logado:", user.email);
+                // Se o usuário está logado e está na página de login/registro, redireciona para games.html
+                if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                    window.location.href = 'games.html';
+                }
+
+            } else {
+                // Usuário não está logado
+                authSection.style.display = 'flex'; // Mostra formulários de login/registro
+                loggedInSection.style.display = 'none'; // Esconde a seção de logado
+                displayLoggedInMessage(''); // Limpa mensagens da seção logada
+                console.log("Nenhum usuário logado.");
+            }
+        });
+
+        // Inicializa mostrando o formulário de login (se ninguém estiver logado)
+        document.addEventListener('DOMContentLoaded', () => {
+            showForm('login');
+        });
+    </script>
+</body>
+</html>

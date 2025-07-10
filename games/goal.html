@@ -4,27 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goal Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --green-field-dark: #004d40;
-            --green-field-light: #2e7d32;
-            --ball-yellow: #ffeb3b;
-            --goal-orange: #ff9800;
-            --bomb-red: #d32f2f;
-            --text-color-light: #ecf0f1;
-            --text-color-dark: #2c3e50;
-            --grid-bg: #212121;
-            --cell-bg-default: #424242;
-            --cell-border-default: #616161;
-            --highlight-green: #4CAF50;
-            --dark-brown: #3e2723;
-        }
-
         body {
-            font-family: 'Orbitron', sans-serif; /* Mais moderno e legível */
-            background: linear-gradient(180deg, var(--green-field-dark) 0%, #00251a 100%);
-            color: var(--text-color-light);
+            font-family: 'Press Start 2P', cursive;
+            background-color: #004d40; /* Verde escuro do campo */
+            color: #ecf0f1;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,94 +19,71 @@
             padding: 20px;
             text-align: center;
             overflow-x: hidden;
-            /* LINHA CORRIGIDA AQUI: xmlnS="http://www.w3.org/2000/svg" */
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgICAgIDxwYXRoIGZpbGw9IiMwMDRUNEQwIiBkPSJNMCAwYzIwMHYyMDBIMCIvPgogICAgICAgIDxwYXRoIGQ9Ik0wIDAgTCA1MCAtNTAgTCAxMDAgMCAgTCA1MCA1MCBMIDAgMCBaIiBmaWxsPSJyZ2JhKDAsMCAwLDAuMDUpIiAvPgogICAgICAgIDxwYXRoIGQ9Ik01MCAtNTAgTCAxMDAgLTIwMCBMIDE1MCAtNTAgTCAxMDAgMCAgTCA1MCAtNTAgWiIgZmlsbD0icmdiYSgwLDAsMCwwLjA1KSIgLz4KICAgIDwvZz4KPC9zdmc+'); /* Padrão sutil de grama */
-            background-size: 200px 200px;
+            background-image: radial-gradient(circle at center, #006050 0%, #004d40 70%, #00332a 100%); /* Gradiente suave no fundo */
         }
 
         h1 {
-            font-family: 'Press Start 2P', cursive; /* Mantido para o título */
-            color: var(--ball-yellow);
+            color: #ffeb3b; /* Amarelo da bola */
             margin-bottom: 25px;
-            font-size: 3.2em;
-            text-shadow: 0 0 15px rgba(255, 235, 59, 0.8), 0 0 25px rgba(255, 235, 59, 0.5);
-            letter-spacing: 2px;
-            animation: bounceTitle 1.5s infinite alternate;
-        }
-
-        @keyframes bounceTitle {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-8px); }
+            font-size: 3.2em; /* Um pouco maior */
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7); /* Sombra mais forte */
+            letter-spacing: 2px; /* Espaçamento entre letras */
         }
 
         #balance {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8em;
+            font-size: 2em; /* Um pouco maior */
             font-weight: bold;
-            color: var(--goal-orange);
-            margin-bottom: 30px;
-            background: linear-gradient(to right, #4CAF50, #8BC34A); /* Mais vibrante */
-            padding: 10px 25px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(255, 152, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.2);
-            border: 3px solid #FF5722;
+            color: #fff; /* Branco para o placar */
+            margin-bottom: 35px; /* Mais espaço */
+            background-color: #212121; /* Fundo mais escuro */
+            padding: 15px 30px; /* Mais padding */
+            border-radius: 20px; /* Bordas mais arredondadas */
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.8), inset 0 0 10px rgba(255, 152, 0, 0.5); /* Sombra externa e interna brilhante */
+            border: 3px solid #ff5722; /* Borda laranja forte */
             position: relative;
             overflow: hidden;
         }
-        #balance::before {
+
+        #balance::before { /* Detalhe de luz no topo */
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
-            background-size: 20px 20px;
-            opacity: 0.2;
+            height: 5px;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
+            opacity: 0.8;
+            border-radius: 5px 5px 0 0;
         }
+
         #currentBalance {
-            color: white; /* Cor do saldo mais clara */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            color: #4CAF50; /* Verde vibrante para o saldo */
+            text-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+            transition: transform 0.1s ease-out; /* Transição para o efeito de pulo */
+            display: inline-block;
         }
 
         .game-container {
-            background: linear-gradient(160deg, #2c3e50, #1a242d); /* Degradê azul-cinza */
-            padding: 35px;
-            border-radius: 25px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.5);
-            border: 5px solid var(--highlight-green);
+            background-color: #2c3e50; /* Azul escuro da noite */
+            padding: 40px; /* Mais padding */
+            border-radius: 25px; /* Mais arredondado */
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 0 5px rgba(76, 175, 80, 0.6); /* Sombra maior e borda brilhante */
+            border: 5px solid #4caf50; /* Verde campo mais claro */
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
-            max-width: 650px; /* Um pouco mais largo */
-            width: 90%;
+            gap: 25px; /* Mais espaço entre elementos */
+            max-width: 650px; /* Mais largo para grids maiores */
+            width: 95%; /* Adaptação para telas menores */
             position: relative;
-            overflow: hidden; /* Para garantir que o gradiente da borda se comporte */
         }
-        .game-container::before {
-            content: '';
-            position: absolute;
-            top: -5px; bottom: -5px; left: -5px; right: -5px;
-            background: linear-gradient(45deg, #4CAF50, #8BC34A, #FFEB3B, #FF9800);
-            z-index: -1;
-            filter: blur(10px);
-            opacity: 0.6;
-            border-radius: 28px;
-        }
-
 
         .grid {
             display: grid;
-            gap: 10px; /* Espaçamento maior */
+            gap: 10px; /* Espaçamento maior entre as células */
             width: 100%;
-            max-width: 550px; 
-            margin-bottom: 20px;
-            padding: 5px; /* Pequeno padding para o grid */
-            box-sizing: border-box;
-            background-color: rgba(0, 0, 0, 0.3); /* Fundo mais escuro para as células */
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 550px; /* Limita a largura da grade */
+            margin-bottom: 25px;
         }
 
         /* Define o número de colunas baseado na variável CSS */
@@ -129,343 +91,302 @@
         .grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
         .grid[data-cols="5"] { grid-template-columns: repeat(5, 1fr); }
 
-
         .cell {
-            width: 80px; 
-            height: 80px;
-            background: linear-gradient(145deg, #4a4a4a, #333333); /* Degradê para profundidade */
-            border-radius: 12px; /* Cantos mais arredondados */
+            width: 90px; /* Tamanho base um pouco maior */
+            height: 90px;
+            background: linear-gradient(145deg, #4f4f4f, #333333); /* Gradiente para profundidade */
+            border-radius: 12px; /* Mais arredondado */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3em;
+            font-size: 3.5em; /* Ícones maiores */
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s, opacity 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
-            border: 2px solid #555;
-            color: transparent; 
+            transition: all 0.2s ease-out; /* Transição mais suave */
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4); /* Sombra interna e externa */
+            border: 3px solid #5a5a5a; /* Borda mais definida */
+            color: transparent; /* Esconde o texto/ícone inicialmente */
             box-sizing: border-box;
-            position: relative; /* Para efeitos internos */
-            overflow: hidden;
+            user-select: none; /* Impede seleção de texto */
         }
-        .cell::before { /* Efeito de brilho na borda */
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            background: linear-gradient(45deg, #757575, #b0b0b0) border-box;
-            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-        }
-        .cell:hover:not(.revealed):not(.disabled)::before {
-            opacity: 1;
+
+        /* Efeito de hover para as células ativas */
+        .cell.current-level:hover:not(.revealed) {
+            transform: translateY(-5px) scale(1.05);
+            background: linear-gradient(145deg, #606060, #404040);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6), 0 8px 15px rgba(0, 0, 0, 0.6);
+            border-color: #888;
         }
 
         /* Ajustes para células em grids maiores/menores */
-        .grid[data-cols="4"] .cell { width: 70px; height: 70px; font-size: 2.8em; border-radius: 10px; }
-        .grid[data-cols="3"] .cell { width: 90px; height: 90px; font-size: 3.2em; border-radius: 15px; }
+        .grid[data-cols="4"] .cell { width: 80px; height: 80px; font-size: 3.2em; }
+        .grid[data-cols="3"] .cell { width: 100px; height: 100px; font-size: 3.8em; }
 
 
         /* Ajuste para que as células se redimensionem em telas menores */
         @media (max-width: 480px) {
             .cell {
-                width: 55px;
-                height: 55px;
-                font-size: 2.2em;
+                width: 60px;
+                height: 60px;
+                font-size: 2.5em;
                 border-radius: 10px;
+                border-width: 2px;
             }
             .grid {
-                max-width: 100%; 
-                gap: 6px;
+                max-width: 100%;
             }
-            .grid[data-cols="3"] .cell { width: 75px; height: 75px; font-size: 2.8em; border-radius: 12px; }
-            .grid[data-cols="4"] .cell { width: 60px; height: 60px; font-size: 2.5em; border-radius: 10px; }
+            .grid[data-cols="3"] .cell { width: 80px; height: 80px; font-size: 3em; }
+            .grid[data-cols="4"] .cell { width: 65px; height: 65px; font-size: 2.8em; }
             h1 { font-size: 2.2em; }
-            #balance { font-size: 1.5em; padding: 8px 20px; }
-            .game-container { padding: 25px; border-width: 4px; gap: 20px; }
+            #balance { font-size: 1.5em; padding: 10px 20px; }
+            .game-container { padding: 25px; }
             .action-buttons button { padding: 10px 20px; font-size: 1em; max-width: 150px; }
+            .bet-input, #fieldSize { font-size: 1em; padding: 8px; }
             .info-display { font-size: 0.9em; padding: 8px 10px; }
-            .bet-input { width: 100px; padding: 8px; font-size: 1em; }
-            .field-select-container label { font-size: 1em; }
-            #fieldSize { padding: 6px; font-size: 1em; }
-        }
-
-        .cell:not(.revealed):not(.disabled):hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.2);
-            background: linear-gradient(145deg, #5c5c5c, #444444);
+            .message-display { font-size: 1em; }
         }
 
         .cell.revealed {
             cursor: default;
-            background-color: #757575; 
-            animation: revealCell 0.3s ease-out forwards;
-            color: white; /* Faz o ícone aparecer */
-        }
-        @keyframes revealCell {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            background-color: #616161; /* Cinza médio quando revelado */
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4); /* Sombra interna mais suave */
+            transform: none; /* Remove transformação de hover ao ser revelado */
         }
 
         .cell.ball {
-            background: linear-gradient(145deg, var(--green-field-light), #4CAF50);
-            color: #fff;
-            font-size: 2.8em; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.4);
-            border-color: #64dd17;
-            animation: bounceBall 0.5s ease-out;
+            background: linear-gradient(145deg, #8bc34a, #689f38); /* Gradiente de verde para bola */
+            color: #fff; /* Cor branca para o ícone */
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra para o ícone */
+            border-color: #7cb342;
         }
-        @keyframes bounceBall {
-            0% { transform: translateY(-10px) scale(0.8); }
-            50% { transform: translateY(5px) scale(1.1); }
-            100% { transform: translateY(0) scale(1); }
-        }
-
 
         .cell.bomb {
-            background: linear-gradient(145deg, var(--bomb-red), #c62828);
+            background: linear-gradient(145deg, #ef5350, #c62828); /* Gradiente de vermelho para bomba */
             color: #fff;
-            font-size: 2.8em; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.4);
-            border-color: #b71c1c;
-            animation: explodeBomb 0.3s forwards;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            border-color: #d32f2f;
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; /* Animação de tremor */
+            transform-origin: center center;
         }
-        @keyframes explodeBomb {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
         
         .cell.disabled {
-            opacity: 0.6; /* Mais visível do que 0.5 */
-            pointer-events: none; 
-            filter: grayscale(50%); /* Efeito de desbotamento */
+            opacity: 0.6; /* Levemente mais transparente */
+            pointer-events: none;
+            cursor: not-allowed;
         }
         .cell.current-level {
             opacity: 1;
-            pointer-events: auto; 
-            filter: none;
-            border-color: var(--ball-yellow); /* Destaca a linha atual */
-            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7), inset 0 0 5px rgba(255, 235, 59, 0.3);
+            pointer-events: auto;
         }
 
 
         .controls-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Espaçamento maior */
+            gap: 20px; /* Mais espaço */
             align-items: center;
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
         .bet-input {
             width: 150px; /* Mais largo */
-            padding: 12px;
-            border-radius: 10px;
-            border: 2px solid var(--highlight-green);
-            background-color: #333;
-            color: var(--text-color-light);
-            font-size: 1.3em;
+            padding: 12px; /* Mais padding */
+            border-radius: 10px; /* Mais arredondado */
+            border: 2px solid #7f8c8d; /* Borda mais visível */
+            background-color: #34495e; /* Fundo mais escuro */
+            color: #ecf0f1;
+            font-size: 1.3em; /* Fonte maior */
             text-align: center;
-            margin-bottom: 10px;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.7);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3); /* Sombra interna */
+            outline: none; /* Remove outline padrão */
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .bet-input:focus {
-            outline: none;
-            border-color: var(--ball-yellow);
-            box-shadow: inset 0 0 10px rgba(255, 235, 59, 0.5);
+            border-color: #3498db;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(52, 152, 219, 0.5);
         }
 
-        .field-select-container { 
+        .field-select-container {
             display: flex;
             align-items: center;
-            gap: 15px; 
-            margin-bottom: 10px;
+            gap: 15px; /* Mais espaço */
             flex-wrap: wrap; 
             justify-content: center;
-            padding: 8px 15px;
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 8px;
+            background-color: #34495e; /* Fundo para o seletor */
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .field-select-container label {
-            font-size: 1.2em;
-            color: var(--text-color-light);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-size: 1.2em; /* Fonte maior */
+            color: #bdc3c7;
         }
 
-        #fieldSize { 
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid var(--goal-orange);
-            background-color: #333;
-            color: var(--text-color-light);
-            font-size: 1.2em;
+        #fieldSize {
+            padding: 10px; /* Mais padding */
+            border-radius: 8px; /* Mais arredondado */
+            border: 2px solid #7f8c8d;
+            background-color: #555;
+            color: #ecf0f1;
+            font-size: 1.2em; /* Fonte maior */
             cursor: pointer;
-            appearance: none; /* Remove estilo padrão do select */
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ecf0f1%22%20d%3D%22M287%2069.1L174.1%20182c-6.7%206.7-17.7%206.7-24.4%200L5.3%2069.1c-6.7-6.7-6.7-17.7%200-24.4s17.7-6.7%2024.4%200l132.8%20132.8L262.6%2044.7c6.7-6.7%2017.7-6.7%2024.4%200s6.8%2017.7.1%2024.4z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px top 50%;
-            background-size: 16px auto;
+            outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         #fieldSize:focus {
-            outline: none;
-            border-color: var(--ball-yellow);
-            box-shadow: 0 0 10px var(--ball-yellow);
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.5);
         }
-
 
         .action-buttons {
             display: flex;
-            gap: 20px; 
+            gap: 20px; /* Mais espaço */
             width: 100%;
             justify-content: center;
             flex-wrap: wrap; 
         }
 
         .action-buttons button {
-            padding: 15px 30px;
-            font-size: 1.3em;
+            padding: 15px 30px; /* Mais padding */
+            font-size: 1.4em; /* Fonte maior */
             border: none;
-            border-radius: 12px;
+            border-radius: 12px; /* Mais arredondado */
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            transition: all 0.2s ease-out; /* Transição para todos os estados */
             font-weight: bold;
             color: white;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
             flex-grow: 1; 
             max-width: 220px; /* Mais largo */
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         #betButton {
-            background: linear-gradient(to right, #27ae60, #2ecc71); 
-            border: 2px solid #2ecc71;
+            background: linear-gradient(145deg, #2ecc71, #27ae60); /* Gradiente verde */
+            border-bottom: 4px solid #1e8449; /* Borda inferior para efeito 3D */
         }
         #betButton:hover {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
+            background: linear-gradient(145deg, #28b463, #229954);
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.6);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
         }
         #betButton:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
+            transform: translateY(1px);
+            border-bottom: 1px solid #1e8449;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
         #betButton:disabled {
-            background: #6c7a89;
-            border-color: #5d6d7e;
+            background: #a5d6a7;
+            border-bottom: 4px solid #82b184;
             cursor: not-allowed;
-            box-shadow: none;
             transform: none;
+            box-shadow: none;
         }
 
         #cashOutButton {
-            background: linear-gradient(to right, #f39c12, #e67e22); 
-            border: 2px solid #e67e22;
+            background: linear-gradient(145deg, #f39c12, #e67e22); /* Gradiente laranja */
+            border-bottom: 4px solid #d35400;
         }
         #cashOutButton:hover {
-            background: linear-gradient(to right, #e67e22, #f39c12);
+            background: linear-gradient(145deg, #e08e0b, #cf6e1a);
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
         }
         #cashOutButton:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4);
+            transform: translateY(1px);
+            border-bottom: 1px solid #d35400;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
         #cashOutButton:disabled {
-            background: #a5a5a5;
-            border-color: #8c8c8c;
+            background: #fabc6b;
+            border-bottom: 4px solid #e09f4c;
             cursor: not-allowed;
-            box-shadow: none;
             transform: none;
+            box-shadow: none;
         }
 
         .info-display {
             width: 100%;
             display: flex;
-            justify-content: space-around; /* Espaçamento mais uniforme */
+            justify-content: space-between;
             align-items: center;
             background-color: #34495e;
-            padding: 12px 20px;
+            padding: 15px 20px; /* Mais padding */
             border-radius: 10px;
-            font-size: 1.2em;
+            font-size: 1.2em; /* Fonte maior */
             color: #bdc3c7;
             margin-top: 15px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            border: 1px solid #2c3e50;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 10px; /* Mais espaço */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4); /* Sombra interna */
+            border: 1px solid #5a6a7a; /* Borda sutil */
         }
 
-        .info-display div { /* Usar div para envolver label e span para melhor controle */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1 1 45%; 
-        }
-        .info-display div span {
+        .info-display span {
             font-weight: bold;
-            color: var(--text-color-light);
-            margin-top: 5px;
-            font-size: 1.1em;
+            color: #ecf0f1;
+            flex: 1 1 48%; /* Ajusta para 2 itens por linha em telas menores */
+            text-align: left;
+            padding: 5px 0;
         }
-        .info-display div:first-child span { color: var(--ball-yellow); }
-        .info-display div:last-child span { color: var(--highlight-green); }
-
+        .info-display span:last-child {
+            text-align: right; 
+        }
+        @media (max-width: 400px) {
+            .info-display span {
+                flex: 1 1 100%; /* Um item por linha em telas muito pequenas */
+                text-align: center;
+            }
+        }
 
         .message-display {
             margin-top: 20px;
             font-size: 1.3em;
             font-weight: bold;
-            color: var(--ball-yellow);
-            min-height: 1.5em;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-            animation: fadeInOutMessage 3s forwards; /* Animação para mensagens */
+            color: #ffeb3b;
+            min-height: 1.5em; /* Garante altura para evitar 'saltos' */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            transition: color 0.3s ease-out; /* Transição para a cor da mensagem */
         }
-        @keyframes fadeInOutMessage {
-            0% { opacity: 0; transform: translateY(-10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(10px); }
+        .message-display.error {
+            color: #e74c3c; /* Cor para mensagens de erro */
+        }
+        .message-display.success {
+            color: #2ecc71; /* Cor para mensagens de sucesso */
         }
         
         .back-button {
-            margin-top: 50px;
+            margin-top: 40px;
             padding: 15px 30px;
-            background-color: #3498db;
+            background: linear-gradient(145deg, #3498db, #2980b9);
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-size: 1.2em;
             text-decoration: none;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5);
-            text-transform: uppercase;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border-bottom: 4px solid #247bb2;
         }
 
         .back-button:hover {
-            background-color: #2980b9;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.7);
+            background: linear-gradient(145deg, #2980b9, #247bb2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
         }
         .back-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+            transform: translateY(1px);
+            border-bottom: 1px solid #247bb2;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
         }
 
         /* Confetti for Goal */
@@ -488,6 +409,7 @@
             border-radius: 50%;
             opacity: 0;
             animation: fall 3s ease-out forwards;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
 
         @keyframes fall {
@@ -500,7 +422,6 @@
                 opacity: 0;
             }
         }
-
     </style>
 </head>
 <body>
@@ -524,12 +445,8 @@
             </div>
 
             <div class="info-display">
-                <div>
-                    Ganhos Potenciais: <span id="potentialPayout">0.00x</span>
-                </div>
-                <div>
-                    Próximo Gol: <span id="nextGoalPayout">0.00x</span>
-                </div>
+                <span>Ganhos Potenciais: <span id="potentialPayout">0.00x</span></span>
+                <span>Próximo Gol: <span id="nextGoalPayout">0.00x</span></span>
             </div>
 
             <div class="action-buttons">
@@ -559,24 +476,26 @@
         let playerBalance = 0;
         let gameActive = false;
         let currentBet = 0;
-        let currentPayoutMultiplier = 1.00; 
+        let currentPayoutMultiplier = 1.00; // Começa em 1x
         
         let numRows = 0; 
         let numCols = 0; 
         
-        let currentLevel = 0; 
+        let currentLevel = 0; // O nível atual que o jogador está jogando (fileira atual)
+        // Alterado: bombPositions agora guarda a posição da BOMBA em cada fileira
         let bombPositions = []; 
 
+        // Definições dos campos (linhas x colunas)
         const fieldDefinitions = {
             small: { rows: 4, cols: 3 },
             medium: { rows: 7, cols: 4 },
             large: { rows: 10, cols: 5 }
         };
 
-        // Sons (certifique-se de ter os arquivos nos locais corretos)
+        // Sons
         const clickSound = new Audio('click_sound.mp3'); 
-        const winSound = new Audio('slot_win.mp3'); 
-        const loseSound = new Audio('slot_lose.mp3'); 
+        const winSound = new Audio('slot_win.mp3'); // Para quando acerta uma bola (não bomba)
+        const loseSound = new Audio('slot_lose.mp3'); // Para quando acerta uma bomba
         const cashOutSound = new Audio('cash_out.mp3'); 
 
         function saveBalance() {
@@ -588,12 +507,18 @@
             if (savedBalance !== null) {
                 playerBalance = parseFloat(savedBalance);
             } else {
-                playerBalance = 20.00; 
+                playerBalance = 20.00; // Saldo inicial
             }
         }
 
-        function updateBalanceDisplay() {
+        function updateBalanceDisplay(animate = false) {
             currentBalanceDisplay.textContent = playerBalance.toFixed(2);
+            if (animate) {
+                currentBalanceDisplay.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    currentBalanceDisplay.style.transform = 'scale(1)';
+                }, 100);
+            }
             saveBalance();
         }
 
@@ -601,84 +526,103 @@
             const selectedField = fieldSizeSelect.value;
             const { rows, cols } = fieldDefinitions[selectedField];
             
+            // O multiplicador para cada nível é baseado em (total de células / número de bolas)
+            // Número de bolas = cols - 1
             const multiplierPerLevel = cols / (cols - 1); 
 
+            // "Ganhos Potenciais" seria o multiplicador final se todas as bolas forem acertadas
             let finalPotentialMultiplier = 1.00;
             for(let i = 0; i < rows; i++) {
                 finalPotentialMultiplier *= multiplierPerLevel;
             }
             potentialPayoutDisplay.textContent = `${finalPotentialMultiplier.toFixed(2)}x`;
 
+            // "Próximo Gol"
             if (gameActive && currentLevel < rows) {
                 nextGoalPayoutDisplay.textContent = `${(currentPayoutMultiplier * multiplierPerLevel).toFixed(2)}x`;
             } else if (!gameActive) {
+                // Antes de começar o jogo, o "Próximo Gol" é o multiplicador da primeira fileira
                 nextGoalPayoutDisplay.textContent = `${multiplierPerLevel.toFixed(2)}x`;
             } else {
-                nextGoalPayoutDisplay.textContent = '---'; 
+                nextGoalPayoutDisplay.textContent = '---'; // Jogo finalizado
             }
 
-            if (gameActive && currentLevel > 0) { 
+            // Atualiza o texto do botão de sacar
+            if (gameActive && currentLevel > 0) { // Pode sacar após o primeiro acerto
                 cashOutButton.textContent = `Sacar (${(currentBet * currentPayoutMultiplier).toFixed(2)})`;
             } else {
                 cashOutButton.textContent = `Sacar (0.00)`;
             }
         }
 
+        function displayMessage(message, type = '') {
+            gameMessageDisplay.textContent = message;
+            gameMessageDisplay.className = 'message-display'; // Reset class
+            if (type) {
+                gameMessageDisplay.classList.add(type);
+            }
+        }
+
         function startGame() {
             const betAmount = parseFloat(betAmountInput.value);
             if (isNaN(betAmount) || betAmount <= 0) {
-                gameMessageDisplay.textContent = "Aposta inválida!";
+                displayMessage("Aposta inválida!", "error");
                 return;
             }
             if (betAmount > playerBalance) {
-                gameMessageDisplay.textContent = "Saldo insuficiente!";
+                displayMessage("Saldo insuficiente!", "error");
                 return;
             }
 
             playerBalance -= betAmount;
-            updateBalanceDisplay();
+            updateBalanceDisplay(true); // Anima o saldo ao debitar
             currentBet = betAmount;
-            currentPayoutMultiplier = 1.00; 
-            currentLevel = 0; 
+            currentPayoutMultiplier = 1.00; // Reseta para 1x no início
+            currentLevel = 0; // Começa na primeira fileira (nível 0)
             gameActive = true;
-            gameMessageDisplay.textContent = "Jogo iniciado! Selecione uma célula na primeira fileira.";
+            displayMessage("Jogo iniciado! Selecione uma célula na primeira fileira.");
             
             betButton.disabled = true;
             betAmountInput.disabled = true;
-            fieldSizeSelect.disabled = true; 
+            fieldSizeSelect.disabled = true; // Desabilita o seletor de campo
             cashOutButton.disabled = true; 
             cashOutButton.textContent = `Sacar (0.00)`;
 
+            // Define numRows e numCols com base na seleção
             const selectedField = fieldSizeSelect.value;
             numRows = fieldDefinitions[selectedField].rows;
             numCols = fieldDefinitions[selectedField].cols;
 
             generateGrid();
+            // Alterado: Chama placeBombs() para colocar UMA bomba por fileira
             placeBombs(); 
-            enableCurrentLevelCells(); 
-            calculatePayouts(); 
+            enableCurrentLevelCells(); // Habilita apenas as células da primeira fileira
+            calculatePayouts(); // Recalcula payouts para o início do jogo
         }
 
         function generateGrid() {
             gameGrid.innerHTML = '';
-            gameGrid.dataset.cols = numCols; 
-            gameGrid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+            // Define o número de colunas para o CSS Grid
+            gameGrid.dataset.cols = numCols; // Usar data-attribute para o CSS
+            gameGrid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`; // Define as linhas
 
             for (let r = 0; r < numRows; r++) {
                 for (let c = 0; c < numCols; c++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
-                    cell.dataset.row = r; 
-                    cell.dataset.col = c; 
+                    cell.dataset.row = r; // Atribui a fileira
+                    cell.dataset.col = c; // Atribui a coluna
                     cell.addEventListener('click', handleCellClick);
                     gameGrid.appendChild(cell);
                 }
             }
         }
 
+        // Alterado: Função para colocar UMA BOMBA por fileira
         function placeBombs() {
             bombPositions = [];
             for (let r = 0; r < numRows; r++) {
+                // Para cada fileira, escolhe uma coluna aleatória para a BOMBA (0 a numCols-1)
                 bombPositions[r] = Math.floor(Math.random() * numCols); 
             }
         }
@@ -688,28 +632,31 @@
             cells.forEach(cell => {
                 const row = parseInt(cell.dataset.row);
                 if (row === currentLevel && !cell.classList.contains('revealed')) {
-                    cell.classList.add('current-level'); 
+                    cell.classList.add('current-level'); // Adiciona classe para estilo/interação
                     cell.classList.remove('disabled');
                 } else {
-                    cell.classList.add('disabled'); 
+                    cell.classList.add('disabled'); // Desabilita outras células
                     cell.classList.remove('current-level');
                 }
             });
         }
 
+        // Alterado: revealRow agora considera que a célula clicada é uma BOLA ou a BOMBA
         function revealRow(rowToReveal, showAllBombs = false) {
             const cellsInRow = gameGrid.querySelectorAll(`.cell[data-row="${rowToReveal}"]`);
             cellsInRow.forEach(cell => {
                 const col = parseInt(cell.dataset.col);
-                cell.classList.add('revealed'); // Adiciona a classe 'revealed' a todas as células da linha
-                if (col === bombPositions[rowToReveal]) { 
+                if (col === bombPositions[rowToReveal]) { // Se a coluna é a posição da bomba
                     cell.classList.add('bomb');
                     cell.innerHTML = '💥';
-                } else { 
-                    cell.classList.add('ball');
-                    cell.innerHTML = '⚽';
+                } else { // Se não é a bomba, é uma bola
+                    if (showAllBombs || cell.classList.contains('revealed')) { 
+                        cell.classList.add('ball');
+                        cell.innerHTML = '⚽';
+                    }
                 }
-                cell.classList.add('disabled'); 
+                cell.classList.add('revealed'); 
+                cell.classList.add('disabled'); // Desabilita todas as células desta linha
                 cell.classList.remove('current-level');
                 cell.removeEventListener('click', handleCellClick);
             });
@@ -722,6 +669,7 @@
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
 
+            // Verifica se é a fileira atual e se a célula ainda não foi revelada
             if (row !== currentLevel || cell.classList.contains('revealed')) {
                 return; 
             }
@@ -729,14 +677,19 @@
             clickSound.currentTime = 0;
             clickSound.play();
 
+            cell.classList.add('revealed');
+
+            // Alterado: Lógica para acertar BOMBA ou BOLA
             if (col === bombPositions[row]) {
+                // Acertou a BOMBA
                 cell.classList.add('bomb');
                 cell.innerHTML = '💥';
-                gameMessageDisplay.textContent = "BOOM! Você atingiu uma bomba. Fim de jogo.";
+                displayMessage("BOOM! Você atingiu uma bomba. Fim de jogo.", "error");
                 loseSound.currentTime = 0;
                 loseSound.play();
                 endGame(false);
             } else {
+                // Acertou a BOLA (não é a bomba)
                 cell.classList.add('ball');
                 cell.innerHTML = '⚽';
                 winSound.currentTime = 0;
@@ -744,21 +697,23 @@
 
                 const selectedField = fieldSizeSelect.value;
                 const { cols } = fieldDefinitions[selectedField];
+                // Multiplicador baseado na chance de acertar uma bola (cols - 1 chances em cols)
                 currentPayoutMultiplier *= (cols / (cols - 1)); 
                 
-                gameMessageDisplay.textContent = `Gol! Multiplicador atual: ${currentPayoutMultiplier.toFixed(2)}x. Prossiga para a próxima fileira!`;
-                cashOutButton.disabled = false; 
+                displayMessage(`Gol! Multiplicador atual: ${currentPayoutMultiplier.toFixed(2)}x. Prossiga para a próxima fileira!`, "success");
+                cashOutButton.disabled = false; // Habilita o saque
                 
-                // Revela toda a linha atual após o acerto
+                // Revela toda a linha atual após o acerto, mostrando as outras bolas e a bomba
                 revealRow(row); 
 
-                currentLevel++; 
+                currentLevel++; // Avança para a próxima fileira
                 
                 if (currentLevel < numRows) {
-                    enableCurrentLevelCells(); 
-                    calculatePayouts(); 
+                    enableCurrentLevelCells(); // Habilita células da nova fileira
+                    calculatePayouts(); // Atualiza payouts
                 } else {
-                    gameMessageDisplay.textContent = `PARABÉNS! Você encontrou todas as ${numRows} bolas! Você ganhou R$ ${(currentBet * currentPayoutMultiplier).toFixed(2)}.`;
+                    // Todas as bolas foram encontradas (todas as fileiras foram passadas sem acertar bomba)!
+                    displayMessage(`PARABÉNS! Você encontrou todas as ${numRows} bolas! Você ganhou R$ ${(currentBet * currentPayoutMultiplier).toFixed(2)}.`, "success");
                     endGame(true);
                 }
             }
@@ -768,35 +723,37 @@
             gameActive = false;
             betButton.disabled = false;
             betAmountInput.disabled = false;
-            fieldSizeSelect.disabled = false; 
+            fieldSizeSelect.disabled = false; // Reabilita o seletor de campo
             cashOutButton.disabled = true;
 
-            // Revela todas as bombas e bolas restantes na grade
+            // Revela todas as bolas e bombas na grade ao final do jogo
             for (let r = 0; r < numRows; r++) {
-                revealRow(r, true); 
+                revealRow(r, true); // Revela a bomba e as bolas restantes de cada linha
             }
 
-            if (won && currentPayoutMultiplier > 1.00) { 
+            if (won && currentPayoutMultiplier > 1.00) { // Garante que houve ganhos
                 playerBalance += (currentBet * currentPayoutMultiplier);
-                updateBalanceDisplay();
+                updateBalanceDisplay(true); // Anima o saldo ao adicionar
                 cashOutSound.currentTime = 0;
                 cashOutSound.play();
                 launchConfetti();
-            } 
+            } else if (!won) {
+                // Se perdeu, o saldo já foi debitado no início, não há ganhos.
+            }
             
-            cashOutButton.textContent = `Sacar (0.00)`; 
-            calculatePayouts(); 
+            cashOutButton.textContent = `Sacar (0.00)`; // Reseta o texto
+            calculatePayouts(); // Atualiza payouts para estado inicial
         }
 
         function cashOut() {
-            if (!gameActive || currentLevel === 0) return; 
+            if (!gameActive || currentLevel === 0) return; // Só pode sacar se o jogo está ativo e pelo menos um gol foi feito
 
             const winnings = currentBet * currentPayoutMultiplier;
-            gameMessageDisplay.textContent = `Você sacou R$ ${winnings.toFixed(2)}!`;
+            displayMessage(`Você sacou R$ ${winnings.toFixed(2)}!`, "success");
             cashOutSound.currentTime = 0;
             cashOutSound.play();
             launchConfetti();
-            endGame(true); 
+            endGame(true); // Termina o jogo com vitória (sacou)
         }
 
         function launchConfetti() {
@@ -819,20 +776,23 @@
         // Initial setup
         loadBalance();
         updateBalanceDisplay();
-        fieldSizeSelect.addEventListener('change', calculatePayouts); 
+        fieldSizeSelect.addEventListener('change', calculatePayouts); // Adiciona listener para o seletor de campo
         betButton.addEventListener('click', startGame);
         cashOutButton.addEventListener('click', cashOut);
         
+        // Carrega os sons para evitar atrasos na primeira execução
         clickSound.load();
         winSound.load();
         loseSound.load();
         cashOutSound.load();
 
+        // Inicializa o jogo com as configurações padrão do campo (Small)
+        // Isso também chama calculatePayouts() indiretamente
         const initialField = fieldSizeSelect.value;
         numRows = fieldDefinitions[initialField].rows;
         numCols = fieldDefinitions[initialField].cols;
-        generateGrid(); 
-        calculatePayouts(); 
+        generateGrid(); // Gera a grade inicial
+        calculatePayouts(); // Calcula payouts iniciais
     </script>
 </body>
 </html>

@@ -90,10 +90,7 @@
         .wheel {
             display: flex;
             height: 100%;
-            /* Remover width fixo aqui, será definido dinamicamente */
             transform: translateX(0); /* Será manipulado por JS */
-            /* A transição será adicionada via JS para controle preciso */
-            /* transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); */ 
         }
 
         .wheel-segment {
@@ -416,6 +413,33 @@
             .back-button { font-size: 1em; padding: 12px 25px; }
         }
     </style>
+    <script type="module">
+        // Importações Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        // Suas configurações do Firebase (SUBSTITUA ESTES VALORES!)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            databaseURL: "SUA_DATABASE_URL",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Torne o 'database' e 'ref' acessíveis globalmente ou passe-os
+        // para funções que precisam deles. Para este exemplo simples, vamos usar globals.
+        window.db = database;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+    </script>
 </head>
 <body>
     <h1>Blaze Double</h1>
@@ -475,9 +499,9 @@
         </div>
     </div>
 
-    <a href="index.html" class="back-button">Voltar para a Página Principal</a>
+    <a href="games.html" class="back-button">Voltar para a Página Principal</a>
 
-    <script>
+    <script type="module"> // Use type="module" para usar imports e exports
         const currentBalanceDisplay = document.getElementById('currentBalance');
         const doubleWheel = document.getElementById('doubleWheel');
         const betAmountInput = document.getElementById('betAmount');
@@ -497,14 +521,11 @@
         const maxHistoryItems = 20; // Quantos itens mostrar no histórico
 
         // Sons (placeholders)
-        // Certifique-se de que esses arquivos de áudio existam no mesmo diretório ou caminho correto
         const spinSound = new Audio('blaze_spin.mp3');
         const winSound = new Audio('blaze_win.mp3');
         const loseSound = new Audio('blaze_lose.mp3');
 
         // Estrutura da roleta - 14 vermelho, 14 preto, 2 branco
-        // Para simular a roleta real, podemos ter a sequência em uma ordem específica
-        // Aqui, uma ordem que garante a distribuição e um bom visual
         const baseWheelSegments = [
             { color: "red", value: "8" }, { color: "black", value: "15" },
             { color: "red", value: "2" }, { color: "black", value: "11" },
@@ -531,18 +552,53 @@
             ...Array(2).fill('white')
         ];
 
+        // Adicione um ID de usuário (em um app real, isso viria da autenticação Firebase)
+        const userId = "jogador123"; // **IMPORTANTE: MUDAR ISSO para o ID do usuário logado em um ambiente real!**
+
+        // --- Funções Firebase Integradas ---
         function saveBalance() {
+            // Salva o saldo no Local Storage (ainda bom para um fallback offline)
             localStorage.setItem('minesPlayerBalance', playerBalance.toFixed(2));
+
+            // Salva o saldo no Firebase
+            // window.db e window.dbSet são referências globais do script Firebase inicializado no head
+            window.dbSet(window.dbRef(window.db, 'users/' + userId + '/balance'), playerBalance)
+            .then(() => {
+                console.log("Saldo salvo no Firebase com sucesso!");
+            })
+            .catch((error) => {
+                console.error("Erro ao salvar saldo no Firebase:", error);
+            });
         }
 
         function loadBalance() {
-            const savedBalance = localStorage.getItem('minesPlayerBalance');
-            if (savedBalance !== null) {
-                playerBalance = parseFloat(savedBalance);
-            } else {
-                playerBalance = 20.00; // Saldo inicial se não houver um salvo
-            }
+            // Primeiro, tente carregar do Firebase
+            const userBalanceRef = window.dbRef(window.db, 'users/' + userId + '/balance');
+            window.dbOnValue(userBalanceRef, (snapshot) => {
+                const firebaseBalance = snapshot.val();
+                if (firebaseBalance !== null) {
+                    playerBalance = parseFloat(firebaseBalance);
+                    console.log("Saldo carregado do Firebase:", playerBalance.toFixed(2));
+                } else {
+                    // Se não houver saldo no Firebase, use o do Local Storage ou o padrão
+                    const savedBalance = localStorage.getItem('minesPlayerBalance');
+                    if (savedBalance !== null) {
+                        playerBalance = parseFloat(savedBalance);
+                        console.log("Saldo carregado do Local Storage:", playerBalance.toFixed(2));
+                    } else {
+                        playerBalance = 20.00; // Saldo inicial se não houver um salvo em nenhum lugar
+                        console.log("Saldo inicial definido:", playerBalance.toFixed(2));
+                    }
+                    // Garante que o saldo inicial seja salvo no Firebase também
+                    saveBalance(); 
+                }
+                updateBalanceDisplay(); // Atualiza a exibição após carregar
+            }, {
+                onlyOnce: true // Carrega apenas uma vez ao iniciar
+            });
         }
+        // --- Fim das Funções Firebase Integradas ---
+
 
         function updateBalanceDisplay(animate = false) {
             currentBalanceDisplay.textContent = playerBalance.toFixed(2);
@@ -619,17 +675,10 @@
         function populateWheel() {
             doubleWheel.innerHTML = ''; // Limpa antes de preencher
             
-            // Adicionar múltiplos blocos da roleta para um giro "contínuo"
-            // Adicionamos um número maior de segmentos para garantir que a roleta possa girar várias vezes
-            // antes de parar no segmento desejado, sem mostrar espaços vazios.
-            // Aqui, vamos duplicar o `baseWheelSegments` algumas vezes.
             const fullWheelForDisplay = [];
-            // Adiciona cópias suficientes para que a animação tenha onde 'andar'
-            // O número 5 aqui é arbitrário, mas garante algumas rotações completas visíveis
             for (let i = 0; i < 5; i++) { 
                 fullWheelForDisplay.push(...baseWheelSegments);
             }
-            // Adiciona mais alguns segmentos do início para a roleta parecer "infinita" ao parar
             fullWheelForDisplay.push(...baseWheelSegments.slice(0, 10)); // Adiciona os 10 primeiros de novo
 
             fullWheelForDisplay.forEach((segment, index) => {
@@ -640,8 +689,6 @@
                 doubleWheel.appendChild(div);
             });
             
-            // NÃO defina a largura total da roleta aqui, deixe que o flexbox e os min-width dos segmentos a definam.
-            // O importante é que haja segmentos suficientes para a animação.
             console.log("Wheel populated with", fullWheelForDisplay.length, "segments.");
         }
 
@@ -677,17 +724,12 @@
             const winningColor = winningColors[Math.floor(Math.random() * winningColors.length)];
             
             // --- CÁLCULO DE ANIMAÇÃO MELHORADO ---
-            // Recalcula segmentWidth no momento do spin para garantir precisão
             const firstSegment = doubleWheel.querySelector('.wheel-segment');
             const segmentWidth = firstSegment ? firstSegment.offsetWidth : 60; 
             const containerWidth = doubleWheel.parentElement.offsetWidth;
             
-            // Quantidade real de segmentos na sua "base" de uma roleta (14+14+2 = 30)
             const actualBaseSegments = baseWheelSegments.length; 
             
-            // Quantas rotações completas queremos que a roleta dê antes de começar a diminuir a velocidade
-            const minFullRotations = 3; 
-
             // Encontra um índice do segmento vencedor DENTRO da primeira *baseWheelSegments*
             let targetSegmentVisualIndex = -1;
             const candidates = [];
@@ -702,21 +744,11 @@
                 targetSegmentVisualIndex = Math.floor(Math.random() * actualBaseSegments); // Fallback
             }
 
-            // O ponto alvo final na roleta estendida.
-            // Queremos que ela pare em uma das *cópias* do segmento vencedor,
-            // garantindo que ela passe por várias rotações completas.
-            // Para garantir que sempre haja segmentos para a direita para parar,
-            // vamos mirar em uma das últimas cópias do baseWheelSegments.
-            // Vamos escolher a 3ª cópia (índice 2, pois é 0-indexed) como o local de parada.
             const targetCopyIndex = 2; // Poderia ser 3, 4, etc., dependendo de quão longe você quer que ela pare
             const finalTargetIndexInFullWheel = (targetCopyIndex * actualBaseSegments) + targetSegmentVisualIndex;
             
-            // Calcula o deslocamento para centralizar o segmento alvo
-            // O `offset` é a distância do início da `doubleWheel` até o centro do segmento alvo.
             const offsetToTargetCenter = (finalTargetIndexInFullWheel * segmentWidth) + (segmentWidth / 2);
             
-            // Para centralizar o target, a roleta precisa se mover para a esquerda,
-            // de forma que o `offsetToTargetCenter` fique no meio do `double-wheel-container`.
             const finalTranslateX = offsetToTargetCenter - (containerWidth / 2);
 
             console.log("Segment Width:", segmentWidth);
@@ -724,16 +756,11 @@
             console.log("Final Target Index in Full Wheel:", finalTargetIndexInFullWheel);
             console.log("Final TranslateX (to reach center):", -finalTranslateX);
 
-
             // 1. Resetar a transição e a posição para um ponto "inicial" que não seja visível
-            // Isso cria a ilusão de que a roleta está sempre girando.
-            // Pule para um ponto *antes* da área visível, mas que contenha a roleta completa.
-            // Por exemplo, pular para o início da segunda cópia da roleta (índice 1)
             const jumpToX = actualBaseSegments * segmentWidth; 
             doubleWheel.style.transition = 'none';
             doubleWheel.style.transform = `translateX(-${jumpToX}px)`;
             
-            // Força um reflow para garantir que a mudança de `transform` seja aplicada IMEDIATAMENTE
             void doubleWheel.offsetWidth; 
 
             // 2. Iniciar a transição para a posição final
@@ -794,15 +821,8 @@
         function addHistoryItem(color) {
             const item = document.createElement('div');
             item.classList.add('history-item', color);
-            // Decide se mostra "B" ou "V" ou "P" ou o número. Optei pelo número.
-            // Para o número, você precisaria ter o valor do segmento que caiu.
-            // Por enquanto, vamos manter um ícone ou a letra inicial da cor para simplicidade.
-            if (color === 'white') item.textContent = 'B';
-            else if (color === 'red') item.textContent = 'V';
-            else item.textContent = 'P'; // Black
-
-            historyList.prepend(item); // Adiciona ao início
-
+            // Você pode adicionar um número ou ícone aqui se quiser, ex: item.textContent = "R";
+            historyList.prepend(item); // Adiciona ao início da lista
             // Limita o número de itens no histórico
             while (historyList.children.length > maxHistoryItems) {
                 historyList.removeChild(historyList.lastChild);
@@ -811,25 +831,10 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
-            loadBalance();
-            updateBalanceDisplay();
-            populateWheel();
-            
-            // Adiciona alguns itens de histórico de exemplo ao carregar
-            // Para testar a visualização
-            addHistoryItem('red');
-            addHistoryItem('black');
-            addHistoryItem('white');
-            addHistoryItem('red');
-            addHistoryItem('black');
-            addHistoryItem('red');
-            addHistoryItem('white');
-            addHistoryItem('black');
-            addHistoryItem('red');
+            loadBalance(); // Carrega o saldo ao iniciar a página
+            populateWheel(); // Popula a roleta
+            spinButton.addEventListener('click', spinWheel);
         });
-
-        spinButton.addEventListener('click', spinWheel);
-
     </script>
 </body>
 </html>
