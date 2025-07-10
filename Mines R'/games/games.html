@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3792334881184352"
+      crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a1a2e; /* Azul escuro */
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            background-image: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        h1 {
+            color: #ffeb3b; /* Amarelo vibrante */
+            margin-bottom: 30px;
+            font-size: 3.5em;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 235, 59, 0.5);
+            letter-spacing: 3px;
+        }
+
+        /* Estilos para a seção de Autenticação */
+        .auth-container {
+            background-color: #21213b;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            border: 5px solid #ff9800; /* Laranja para borda do container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 500px;
+            width: 95%;
+            position: relative;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auth-toggle button {
+            background-color: #3f51b5; /* Azul */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-toggle button:hover {
+            background-color: #536dfe;
+            transform: translateY(-2px);
+        }
+
+        .auth-toggle button.active {
+            background-color: #ffeb3b; /* Amarelo quando ativo */
+            color: #21213b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+            transform: scale(1.05);
+        }
+
+        .auth-form {
+            width: 100%;
+            display: none; /* Escondido por padrão, JavaScript vai mostrar */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form.active {
+            display: flex; /* Ativa o formulário */
+        }
+
+        .auth-form input[type="email"],
+        .auth-form input[type="password"] {
+            width: calc(100% - 24px); /* Ajusta para padding */
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #7f8c8d;
+            background-color: #34495e;
+            color: #ecf0f1;
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-form input:focus {
+            border-color: #ffeb3b;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 235, 59, 0.3);
+        }
+
+        .auth-form button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .auth-form button.login-btn {
+            background: linear-gradient(145deg, #4CAF50, #388E3C); /* Verde */
+            border-bottom: 5px solid #1B5E20;
+        }
+        .auth-form button.login-btn:hover {
+            background: linear-gradient(145deg, #66BB6A, #4CAF50);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button.register-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9); /* Azul */
+            border-bottom: 5px solid #247bb2;
+        }
+        .auth-form button.register-btn:hover {
+            background: linear-gradient(145deg, #2980b9, #247bb2);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-form button:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .auth-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message-display {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 1.5em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            transition: color 0.3s ease-out;
+        }
+        .message-display.error {
+            color: #e74c3c;
+        }
+        .message-display.success {
+            color: #2ecc71;
+        }
+        .message-display.info {
+            color: #3498db;
+        }
+
+        /* Estilos para a seção Logged In (Games) */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 95%;
+            max-width: 900px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Para responsividade */
+            padding: 10px 0;
+        }
+
+        .user-info {
+            font-size: 1.2em;
+            color: #2ecc71;
+            flex-grow: 1; /* Ocupa espaço disponível */
+            text-align: left;
+            margin-right: 20px; /* Espaço entre info e saldo */
+            white-space: nowrap; /* Evita quebra de linha no email */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Adiciona "..." se o texto for muito longo */
+        }
+        
+        .balance-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ffeb3b;
+            flex-shrink: 0; /* Não encolhe */
+        }
+
+        .balance-label {
+            font-size: 1em;
+            color: #bbb;
+        }
+
+        .balance-value {
+            font-size: 1.8em;
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .recharge-button {
+            background: linear-gradient(145deg, #1abc9c, #16a085); /* Teal */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+            border-bottom: 3px solid #148f77;
+            white-space: nowrap; /* Evita quebra de linha */
+        }
+        .recharge-button:hover {
+            background: linear-gradient(145deg, #1abc9c, #1abc9c);
+            transform: translateY(-2px);
+        }
+        .recharge-button:active {
+            transform: translateY(1px);
+            border-bottom: 1px solid #148f77;
+        }
+
+        .game-selection-container {
+            background-color: #21213b;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            border: 5px solid #ff9800; /* Laranja para borda do container */
+            display: flex;
+            flex-wrap: wrap; /* Permite que os itens quebrem linha */
+            justify-content: center;
+            gap: 30px;
+            max-width: 900px;
+            width: 95%;
+        }
+
+        .game-card {
+            background-color: #34495e;
+            border: 3px solid #3f51b5;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 15px;
+            width: 250px; /* Largura fixa para os cards */
+            min-height: 200px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+            border-color: #ffeb3b;
+        }
+
+        .game-card img {
+            max-width: 100%;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid #536dfe;
+        }
+
+        .game-card h2 {
+            font-size: 1.5em;
+            color: #ffeb3b;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-card p {
+            font-size: 0.9em;
+            color: #bbb;
+            flex-grow: 1; /* Para ocupar o espaço restante */
+        }
+
+        .game-card button {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border-bottom: 4px solid #1B5E20; 
+        }
+
+        .game-card button:hover {
+            background: linear-gradient(145deg, #66BB6A, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+        }
+        .game-card button:active {
+            transform: translateY(1px);
+            border-bottom: 2px solid #1B5E20;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .controls button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .logout-btn-game-page {
+            background: linear-gradient(145deg, #f44336, #d32f2f); /* Vermelho */
+            border-bottom: 5px solid #b71c1c;
+        }
+        .logout-btn-game-page:hover {
+            background: linear-gradient(145deg, #ef5350, #f44336);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+        .logout-btn-game-page:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid #b71c1c;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #ffeb3b; /* Yellow */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-top: 50px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .user-info {
+                text-align: center;
+                margin-right: 0;
+            }
+            .balance-area {
+                width: 100%; /* Ocupa a largura total */
+                justify-content: center;
+            }
+            .game-selection-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .game-card {
+                width: 90%; /* Ocupa mais espaço em telas menores */
+            }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2em; letter-spacing: 2px; }
+            .user-info { font-size: 1em; }
+            .balance-label { font-size: 0.9em; }
+            .balance-value { font-size: 1.5em; }
+            .recharge-button { font-size: 0.8em; padding: 6px 12px; }
+            .game-selection-container, .auth-container { padding: 30px; gap: 20px; }
+            .game-card { padding: 15px; }
+            .game-card h2 { font-size: 1.2em; }
+            .game-card p { font-size: 0.8em; }
+            .game-card button { font-size: 0.9em; padding: 10px 15px; }
+            .controls button { font-size: 1em; padding: 12px 20px; }
+            .auth-toggle button { padding: 10px 18px; font-size: 1em; }
+            .auth-form input { width: calc(100% - 20px); font-size: 1em; padding: 10px; }
+            .auth-form button { font-size: 1em; padding: 12px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="mainTitle">Casino Online</h1>
+
+    <div class="auth-wrapper" id="authSection">
+        <div class="auth-container">
+            <div class="auth-toggle">
+                <button id="loginTab" class="active">Login</button>
+                <button id="registerTab">Registrar</button>
+            </div>
+
+            <form id="loginForm" class="auth-form active">
+                <input type="email" id="loginEmail" placeholder="E-mail" required>
+                <input type="password" id="loginPassword" placeholder="Senha" required>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+
+            <form id="registerForm" class="auth-form">
+                <input type="email" id="registerEmail" placeholder="E-mail" required>
+                <input type="password" id="registerPassword" placeholder="Senha" required>
+                <input type="password" id="confirmPassword" placeholder="Confirmar Senha" required>
+                <button type="submit" class="register-btn">Registrar</button>
+            </form>
+            
+            <div class="message-display" id="authMessage"></div>
+        </div>
+    </div>
+
+    <div id="gamesSection" style="display: none;">
+        <div class="header-content">
+            <div class="user-info">Bem-vindo(a), <span id="userEmailDisplay">Carregando...</span></div>
+            <div class="balance-area">
+                <span class="balance-label">Saldo:</span>
+                <span class="balance-value" id="userBalanceDisplay">0.00</span>
+                <button id="rechargeBtn" class="recharge-button">Recarregar (+100)</button>
+            </div>
+        </div>
+
+        <div id="loadingScreen" class="loading-spinner" style="display: none;"></div>
+        
+        <div class="game-selection-container" id="gameList">
+            <div class="game-card" data-game-url="games/double.html">
+                <img src="https://zlincontent.com/cdn/casino/double6.jpg" alt="Blaze Double Logo">
+                <h2>Blaze Double</h2>
+                <p>Aposte no vermelho, branco ou preto e veja o multiplicador girar!</p>
+                <button class="play-game-btn">Jogar Blaze Double</button>
+            </div>
+
+            <div class="game-card" data-game-url="games/mines.html">
+                <img src="https://tse4.mm.bing.net/th/id/OIP.zcaea92DRgOaXaIkilhPwQHaD4?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Mines Logo">
+                <h2>Mines</h2>
+                <p>Descubra as estrelas e evite as minas neste jogo de estratégia.</p>
+                <button class="play-game-btn">Jogar Mines</button>
+            </div>
+
+            <div class="game-card" data-game-url="games/fortune-tiger.html">
+                <img src="https://i.postimg.cc/RZNs1mQ0/piclumen-1752092025304.png" alt="Fortune Tiger Logo"> <h2>Fortune Tiger</h2>
+                <p>Um jogo de slot vibrante com um tema asiático.</p>
+                <button class="play-game-btn">Jogar Fortune Tiger</button>
+            </div>
+
+            <div class="game-card" data-game-url="games/dice.html">
+                <img src="data:image/webp;base64,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" alt="Dice Logo">
+                <h2>Dice</h2>
+                <p>Aposte no resultado do lançamento dos dados. Simples e divertido!</p>
+                <button class="play-game-btn">Jogar Dice</button>
+            </div>
+            
+            </div>
+
+        <div class="controls">
+            <button id="logoutBtn" class="logout-btn-game-page">Sair</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importa as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // SUA CONFIGURAÇÃO DO FIREBASE (COLE AQUI O OBJETO COPIADO DO CONSOLE DO FIREBASE)
+        const firebaseConfig = {
+          apiKey: "AIzaSyB4xJYbkiJq0AmpEqEw7OjgGLNB0Xj_px0",
+          authDomain: "minesr-c4cdd.firebaseapp.com",
+          projectId: "minesr-c4cdd",
+          storageBucket: "minesr-c4cdd.firebasestorage.app",
+          messagingSenderId: "23212779178",
+          appId: "1:232127791789:web:b9de6157faabb44f357c2"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Referências aos elementos HTML (login/registro)
+        const authSection = document.getElementById('authSection');
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authMessageDisplay = document.getElementById('authMessage');
+
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        // Referências aos elementos HTML (jogos)
+        const gamesSection = document.getElementById('gamesSection');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userBalanceDisplay = document.getElementById('userBalanceDisplay');
+        const rechargeBtn = document.getElementById('rechargeBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const gameList = document.getElementById('gameList');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainTitle = document.getElementById('mainTitle');
+
+        let currentUser = null; // Para armazenar o usuário logado
+
+        // Funções de utilidade
+        function displayAuthMessage(message, type = '') {
+            authMessageDisplay.textContent = message;
+            authMessageDisplay.className = 'message-display';
+            if (type) {
+                authMessageDisplay.classList.add(type);
+            }
+        }
+
+        function formatBalance(balance) {
+            // Se o saldo for nulo, indefinido ou não um número, exibe 0.00 ou uma mensagem.
+            if (typeof balance !== 'number' || isNaN(balance)) {
+                return 'R$ 0,00';
+            }
+            return balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        async function loadUserBalance(userId) {
+            const userRef = doc(db, "users", userId);
+            try {
+                const docSnap = await getDoc(userRef);
+                if (docSnap.exists()) {
+                    const balance = docSnap.data().balance;
+                    userBalanceDisplay.textContent = formatBalance(balance);
+                    console.log(`Saldo do usuário ${userId} carregado: ${balance}`);
+                } else {
+                    console.warn(`Documento de saldo para o usuário ${userId} não encontrado. Inicializando saldo com R$1000.00.`);
+                    // Se o documento não existe, inicializa-o no Firestore
+                    await setDoc(userRef, { balance: 1000.00 });
+                    userBalanceDisplay.textContent = formatBalance(1000.00);
+                    alert("Seu saldo foi inicializado com R$1000,00! Bom jogo!");
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ou inicializar saldo do usuário:", error);
+                userBalanceDisplay.textContent = "Erro ao carregar";
+                alert("Erro ao carregar seu saldo. Tente novamente ou entre em contato com o suporte.");
+            }
+        }
+
+        // --- Lógica da Seção de Autenticação ---
+        function showAuthForm(formId) {
+            loginTab.classList.remove('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.remove('active');
+            registerForm.classList.remove('active');
+            displayAuthMessage('');
+
+            if (formId === 'login') {
+                loginTab.classList.add('active');
+                loginForm.classList.add('active');
+                mainTitle.textContent = "Casino Online - Login";
+            } else {
+                registerTab.classList.add('active');
+                registerForm.classList.add('active');
+                mainTitle.textContent = "Casino Online - Registrar";
+            }
+        }
+
+        loginTab.addEventListener('click', () => showAuthForm('login'));
+        registerTab.addEventListener('click', () => showAuthForm('register'));
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            displayAuthMessage("Tentando fazer login...", "info");
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged vai lidar com a transição para a seção de jogos
+            } catch (error) {
+                console.error("Erro de login:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao fazer login.";
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Sua conta foi desativada.';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = 'E-mail ou senha incorretos.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao fazer login. Verifique seu e-mail e senha.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                displayAuthMessage("As senhas não coincidem.", "error");
+                return;
+            }
+            if (password.length < 6) {
+                displayAuthMessage("A senha deve ter pelo menos 6 caracteres.", "error");
+                return;
+            }
+
+            displayAuthMessage("Tentando registrar...", "info");
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // **** AQUI: Inicializa o saldo para o NOVO usuário no Firestore ****
+                await setDoc(doc(db, "users", user.uid), { balance: 1000.00 }); 
+                console.log(`Usuário ${user.email} registrado e saldo inicializado com R$1000,00.`);
+
+                // onAuthStateChanged vai lidar com a transição para a seção de jogos e carregar o saldo
+                displayAuthMessage("Registro bem-sucedido! Redirecionando...", "success");
+
+            } catch (error) {
+                console.error("Erro de registro:", error.code, error.message);
+                let errorMessage = "Erro desconhecido ao registrar.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está em uso.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'A senha é muito fraca. Escolha uma senha mais forte.';
+                        break;
+                    default:
+                        errorMessage = 'Erro ao registrar. Tente novamente.';
+                        break;
+                }
+                displayAuthMessage(errorMessage, "error");
+            }
+        });
+
+        // --- Lógica da Seção de Jogos ---
+        rechargeBtn.addEventListener('click', async () => {
+            if (currentUser) {
+                const userId = currentUser.uid;
+                const userRef = doc(db, "users", userId);
+                try {
+                    const docSnap = await getDoc(userRef);
+                    let currentBalance = 0;
+                    if (docSnap.exists()) {
+                        currentBalance = docSnap.data().balance || 0;
+                    } else {
+                        // Se o documento de saldo não existir durante a recarga, cria com o valor de recarga (inicialização tardia)
+                        console.warn(`Documento de saldo para o usuário ${userId} não encontrado durante a recarga. Criando documento.`);
+                        await setDoc(userRef, { balance: 0 }); // Inicializa com 0 antes de adicionar a recarga
+                    }
+                    
+                    const rechargeAmount = 100.00;
+                    currentBalance += rechargeAmount;
+
+                    await updateDoc(userRef, { balance: currentBalance });
+                    userBalanceDisplay.textContent = formatBalance(currentBalance);
+                    alert(`Saldo recarregado! Você adicionou ${formatBalance(rechargeAmount)}. Novo saldo: ${formatBalance(currentBalance)}`);
+                    console.log(`Saldo do usuário ${userId} recarregado para: ${currentBalance}`);
+                } catch (error) {
+                    console.error("Erro ao recarregar saldo:", error);
+                    alert("Erro ao recarregar saldo. Tente novamente.");
+                }
+            } else {
+                alert("Você precisa estar logado para recarregar o saldo.");
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                console.log("Usuário deslogado com sucesso.");
+                // onAuthStateChanged vai lidar com a transição de volta para a seção de autenticação
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+                alert("Erro ao sair. Tente novamente.");
+            }
+        });
+
+        // Event listener para os botões "Jogar" dos cards
+        gameList.addEventListener('click', (event) => {
+            const button = event.target.closest('.play-game-btn'); // Procura pelo botão com a classe 'play-game-btn'
+            if (button) {
+                const gameCard = button.closest('.game-card');
+                const gameUrl = gameCard.dataset.gameUrl;
+                if (gameUrl) {
+                    window.location.href = gameUrl; // Redireciona para a URL do jogo
+                } else {
+                    console.error("URL do jogo não encontrada para este card.");
+                }
+            }
+        });
+
+
+        // Observador de estado de autenticação do Firebase
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Usuário logado
+                currentUser = user;
+                userEmailDisplay.textContent = user.email;
+                mainTitle.textContent = "Escolha seu Jogo";
+
+                authSection.style.display = 'none';
+                loadingScreen.style.display = 'block'; // Mostra o spinner enquanto carrega
+                gamesSection.style.display = 'none'; // Esconde a seção de jogos temporariamente
+
+                await loadUserBalance(user.uid); // Carrega o saldo do usuário
+
+                loadingScreen.style.display = 'none'; // Esconde o spinner
+                gamesSection.style.display = 'flex'; // Mostra a seção de jogos
+            } else {
+                // Usuário deslogado
+                currentUser = null;
+                userEmailDisplay.textContent = "Não logado";
+                userBalanceDisplay.textContent = formatBalance(0); // Reseta o saldo na tela
+                mainTitle.textContent = "Casino Online";
+
+                gamesSection.style.display = 'none';
+                authSection.style.display = 'flex';
+                showAuthForm('login'); // Volta para a tela de login
+            }
+        });
+
+        // Inicializa a tela de login ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showAuthForm('login');
+        });
+
+    </script>
+</body>
+</html>
