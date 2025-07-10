@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune Tiger 3x3 - Rolagem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a2e; /* Dark Blue-Purple */
+            --primary-color: #e6b800; /* Gold */
+            --secondary-color: #ff4500; /* Orange-Red */
+            --accent-color: #6a0572; /* Dark Purple */
+            --text-color: #f0f0f0; /* Off-white */
+            --success-color: #2ecc71; /* Emerald Green */
+            --danger-color: #e74c3c; /* Bright Red */
+            --highlight-win: #3aff3a; /* Green for win highlight */
+            --symbol-size: 5.5em; /* Define um tamanho base para os símbolos */
+            --slot-height: 150px; /* Define a altura de cada slot */
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color), #0f0f1d);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-y: auto; /* Permite rolagem vertical */
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: 'Luckiest Guy', cursive;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 3.5em;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 25px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+            animation: pulseTitle 2s infinite alternate;
+        }
+
+        @keyframes pulseTitle {
+            0% { transform: scale(1); text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1.03); text-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 30px rgba(255, 215, 0, 0.7); }
+        }
+
+        #game-container {
+            background: linear-gradient(180deg, #3a0050, #2b003d);
+            border: 8px solid var(--primary-color);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(255, 215, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        #game-info-panel {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .info-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            min-width: 120px;
+        }
+        .info-box span {
+            color: var(--primary-color);
+            margin-top: 5px;
+            font-size: 1.1em;
+        }
+        #currentBalance { color: var(--success-color); }
+        #currentBetDisplay { color: var(--secondary-color); }
+
+
+        #slot-machine {
+            display: flex;
+            gap: 10px;
+            background-color: #0f0f1d;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 4px solid var(--accent-color);
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        #tiger-header {
+            position: absolute;
+            top: -110px;
+            width: calc(100% + 60px);
+            left: -30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 6em;
+            padding: 20px 0;
+            background: linear-gradient(to top, var(--accent-color), #7f0088);
+            border-radius: 20px 20px 0 0;
+            box-shadow: inset 0 -8px 20px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
+            height: 120px;
+            box-sizing: border-box;
+            z-index: 0;
+            border-bottom: 5px solid var(--primary-color);
+        }
+        #tiger-header span {
+            animation: bounceTiger 2s infinite ease-in-out;
+            color: #f39c12;
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.8), 0 0 25px rgba(255, 140, 0, 0.6);
+        }
+
+        @keyframes bounceTiger {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .reel {
+            width: 120px;
+            height: calc(var(--slot-height) * 3); /* Height for 3 visible slots */
+            background-color: #0d0d1a;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Alinha símbolos no topo */
+            align-items: center;
+            overflow: hidden; /* Crucial para a rolagem */
+            position: relative;
+            border: 3px solid #555;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .reel-inner {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            transition: transform 0s ease-out; /* Transição controlada por JS */
+        }
+        
+        .symbol-slot {
+            width: 100%;
+            height: var(--slot-height);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: var(--symbol-size);
+            flex-shrink: 0; /* Impede que os slots encolham */
+            box-sizing: border-box;
+        }
+
+        .symbol {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
+
+        /* Animação de rolagem do rolo */
+        .reel-inner.spin-animation {
+            transition: transform var(--spin-duration) cubic-bezier(0.25, 0.1, 0.25, 1); /* Ajustar curva para parada suave */
+        }
+
+        .reel.stop-flash {
+            animation: stopFlash 0.1s ease-out;
+        }
+        @keyframes stopFlash {
+            0% { filter: brightness(2); }
+            100% { filter: brightness(1); }
+        }
+
+        /* Highlight for winning symbols */
+        .symbol-slot.winning-symbol {
+            animation: winHighlight 0.5s infinite alternate;
+            box-shadow: 0 0 20px var(--highlight-win), inset 0 0 15px var(--highlight-win);
+            border-radius: 5px;
+        }
+        @keyframes winHighlight {
+            0% { background-color: transparent; }
+            100% { background-color: rgba(58, 255, 58, 0.3); }
+        }
+
+
+        #controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #betAmountInput {
+            width: 100px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
+            background-color: #2a2a40;
+            color: var(--text-color);
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
+            transition: border-color 0.2s;
+        }
+        #betAmountInput:focus {
+            outline: none;
+            border-color: var(--success-color);
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.4em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #spinButton {
+            background: linear-gradient(to bottom, var(--secondary-color), #a83100);
+            color: white;
+            box-shadow: 0 6px 15px rgba(255, 69, 0, 0.6);
+            border: 3px solid #ffaa00;
+            animation: glowSpinButton 1.5s infinite alternate;
+        }
+
+        #spinButton:hover {
+            background: linear-gradient(to bottom, #ff5e1a, #bd3800);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.8);
+        }
+
+        #spinButton:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 5px rgba(255, 69, 0, 0.5);
+            background: #a83100;
+        }
+
+        #spinButton:disabled {
+            background: #4a4a4a;
+            color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            border: 3px solid #333;
+            animation: none;
+        }
+
+        @keyframes glowSpinButton {
+            0% { box-shadow: 0 6px 15px rgba(255, 69, 0, 0.6); }
+            100% { box-shadow: 0 6px 20px rgba(255, 69, 0, 0.9), 0 0 10px rgba(255, 69, 0, 0.7); }
+        }
+
+        #winningsDisplay {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-top: 25px;
+            min-height: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+        .back-button {
+            margin-top: 40px;
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-decoration: none;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        /* Confetti animation */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            opacity: 0;
+            animation: fall 3s ease-out forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Auto Spin Controls */
+        #autoSpinControls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #autoSpinCount {
+            width: 60px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--primary-color);
+            background-color: #2a2a40;
+            color: var(--text-color);
+            text-align: center;
+            font-size: 1em;
+        }
+
+        #startAutoSpin, #stopAutoSpin {
+            padding: 8px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        #startAutoSpin {
+            background-color: #28a745;
+            color: white;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+        }
+        #startAutoSpin:hover { background-color: #218838; transform: translateY(-1px); }
+        #startAutoSpin:active { transform: translateY(1px); }
+
+        #stopAutoSpin {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+            display: none;
+        }
+        #stopAutoSpin:hover { background-color: #c82333; transform: translateY(-1px); }
+        #stopAutoSpin:active { transform: translateY(1px); }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8em; margin-bottom: 20px; }
+            #game-container { padding: 20px; border-width: 6px; }
+            .info-box { font-size: 1.1em; min-width: 100px; padding: 8px 15px; }
+            .info-box span { font-size: 1em; }
+            #slot-machine { padding: 15px; gap: 8px; }
+            .reel { width: 90px; height: calc(var(--slot-height) * 3 * 0.8); border-width: 2px; }
+            .symbol-slot { height: calc(var(--slot-height) * 0.8); }
+            .symbol { font-size: calc(var(--symbol-size) * 0.8); }
+            #tiger-header { font-size: 4.5em; top: -90px; height: 100px; }
+            #controls { flex-direction: column; gap: 10px; padding: 15px 20px; }
+            #betAmountInput { width: 80px; padding: 10px; font-size: 1em; }
+            button { padding: 12px 30px; font-size: 1.2em; }
+            #winningsDisplay { font-size: 1.5em; margin-top: 20px; }
+            .back-button { margin-top: 30px; font-size: 0.9em; }
+            #autoSpinControls { flex-direction: column; gap: 8px; padding: 8px 15px; }
+            #autoSpinCount { width: 50px; padding: 6px; font-size: 0.9em; }
+            #startAutoSpin, #stopAutoSpin { padding: 6px 12px; font-size: 0.9em; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2em; }
+            #game-container { padding: 15px; border-width: 4px; }
+            .info-box { font-size: 0.9em; min-width: 80px; padding: 6px 10px; }
+            .info-box span { font-size: 0.9em; }
+            #slot-machine { padding: 10px; gap: 5px; }
+            .reel { width: 70px; height: calc(var(--slot-height) * 3 * 0.6); border-width: 2px; }
+            .symbol-slot { height: calc(var(--slot-height) * 0.6); }
+            .symbol { font-size: calc(var(--symbol-size) * 0.6); }
+            #tiger-header { font-size: 3.5em; top: -70px; height: 80px; }
+            #controls { gap: 8px; padding: 10px 15px; }
+            #betAmountInput { width: 60px; padding: 8px; font-size: 0.9em; }
+            button { padding: 10px 20px; font-size: 1em; }
+            #winningsDisplay { font-size: 1.2em; margin-top: 15px; }
+            .back-button { margin-top: 20px; font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Fortune Tiger 3x3</h1>
+
+    <div id="game-container">
+        <div id="game-info-panel">
+            <div class="info-box">
+                Saldo: <span id="currentBalance">0.00</span> BRL
+            </div>
+            <div class="info-box">
+                Aposta: <span id="currentBetDisplay">1.00</span> BRL
+            </div>
+        </div>
+
+        <div id="slot-machine">
+            <div id="tiger-header"><span>🐯</span></div>
+            <div class="reel" id="reel1">
+                <div class="reel-inner" id="reel1-inner">
+                    </div>
+            </div>
+            <div class="reel" id="reel2">
+                <div class="reel-inner" id="reel2-inner">
+                    </div>
+            </div>
+            <div class="reel" id="reel3">
+                <div class="reel-inner" id="reel3-inner">
+                    </div>
+            </div>
+        </div>
+
+        <div id="controls">
+            <div>
+                <label for="betAmountInput">Aposta (BRL): </label>
+                <input type="number" id="betAmountInput" min="1" value="1" step="0.50">
+            </div>
+            <button id="spinButton" onclick="spinReels()">Girar</button>
+        </div>
+
+        <div id="autoSpinControls">
+            <label for="autoSpinCount">Giros Automáticos:</label>
+            <input type="number" id="autoSpinCount" min="1" value="10">
+            <button id="startAutoSpin">Iniciar Auto</button>
+            <button id="stopAutoSpin">Parar Auto</button>
+        </div>
+
+        <div class="info-box" id="winningsDisplay"></div>
+    </div>
+
+    <a href="index.html" class="back-button">Voltar para a Página Principal</a>
+
+    <div id="confetti-container"></div>
+
+    <script>
+        // Seletores de elementos DOM
+        const reelContainers = [
+            document.getElementById('reel1'),
+            document.getElementById('reel2'),
+            document.getElementById('reel3')
+        ];
+        const reelInners = [
+            document.getElementById('reel1-inner'),
+            document.getElementById('reel2-inner'),
+            document.getElementById('reel3-inner')
+        ];
+
+        const currentBalanceDisplay = document.getElementById('currentBalance');
+        const betAmountInput = document.getElementById('betAmountInput');
+        const currentBetDisplay = document.getElementById('currentBetDisplay');
+        const spinButton = document.getElementById('spinButton');
+        const winningsDisplay = document.getElementById('winningsDisplay');
+        const confettiContainer = document.getElementById('confetti-container');
+
+        const autoSpinCountInput = document.getElementById('autoSpinCount');
+        const startAutoSpinButton = document.getElementById('startAutoSpin');
+        const stopAutoSpinButton = document.getElementById('stopAutoSpin');
+
+        let playerBalance = 0;
+        let isSpinning = false;
+        let autoSpinInterval = null; // Changed to boolean flag for clarity, as setTimeout handles the loop
+        let remainingAutoSpins = 0;
+        let spinTimeoutId = null; // To store the ID of the setTimeout for auto-spin
+
+        // Altura de um slot para calcular a translação
+        const SLOT_HEIGHT = 150; // px (ajustar de acordo com o CSS --slot-height)
+        const SPIN_DURATION = 1.5; // segundos (duração da animação de giro)
+
+        // Atualização dos símbolos e suas ponderações
+        const weightedSymbols = [
+            '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', '🍊', // Laranja (muito comum)
+            '🧨', '🧨', '🧨', '🧨', '🧨', '🧨', // Fogos de artifício (comum)
+            '🧧', '🧧', '🧧', '🧧', '🧧', // Envelopes (médio)
+            '💰', '💰', '💰', '💰', // Saco de moedas (médio-raro)
+            '👑', '👑', '👑', // Amuleto da sorte (raro)
+            '💎', '💎', // Lingote de ouro (muito raro)
+            '🐯' // Tigre (Wild - extremamente raro, mas valioso)
+        ];
+
+        // Mapeamento de payouts baseado na sua descrição
+        const payouts = {
+            '🍊': 0.3,         // Laranja
+            '🧨': 0.5,         // Fogos de artifício
+            '🧧': 0.8,         // Envelopes
+            '💰': 1,           // Saco de moedas
+            '👑': 2.5,         // Amuleto da sorte
+            '💎': 10,          // Lingote de ouro
+            '🐯': 25           // Tigre (Wild)
+        };
+
+        // Sound effects (assegure-se de que esses arquivos estão na mesma pasta)
+        // Você precisará ter os arquivos de áudio nomeados como:
+        // slot_spin.mp3, slot_win.mp3, slot_no_win.mp3, slot_big_win.mp3
+        const spinSound = new Audio('slot_spin.mp3');
+        const winSound = new Audio('slot_win.mp3');
+        const noWinSound = new Audio('slot_no_win.mp3');
+        const bigWinSound = new Audio('slot_big_win.mp3');
+
+        // --- Gerenciamento de Saldo ---
+        function saveBalance() {
+            localStorage.setItem('minesPlayerBalance', playerBalance.toFixed(2));
+        }
+
+        function loadBalance() {
+            const savedBalance = localStorage.getItem('minesPlayerBalance');
+            if (savedBalance !== null) {
+                playerBalance = parseFloat(savedBalance);
+            } else {
+                playerBalance = 20.00; // Saldo inicial se não houver nada salvo
+            }
+        }
+
+        function updateBalanceDisplay() {
+            currentBalanceDisplay.textContent = playerBalance.toFixed(2);
+            saveBalance();
+        }
+
+        function updateBetDisplay() {
+            currentBetDisplay.textContent = parseFloat(betAmountInput.value).toFixed(2);
+        }
+
+        // --- Lógica de Símbolos ---
+        function getRandomSymbol() {
+            return weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.winning-symbol').forEach(el => {
+                el.classList.remove('winning-symbol');
+            });
+        }
+
+        // --- Confetti Animation ---
+        function createConfetti() {
+            const colors = ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        function clearConfetti() {
+            confettiContainer.innerHTML = '';
+        }
+
+        // --- Lógica de Giro ---
+        async function spinReels() {
+            if (isSpinning) return;
+
+            const betAmount = parseFloat(betAmountInput.value);
+
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert("Por favor, insira um valor de aposta válido.");
+                stopAutoSpin(); // Stop auto-spin if bet is invalid
+                return;
+            }
+            if (playerBalance < betAmount) {
+                alert(`Saldo insuficiente! Você tem R$ ${playerBalance.toFixed(2)}. Por favor, diminua sua aposta ou adicione fundos.`);
+                stopAutoSpin(); // Stop auto-spin if balance is insufficient
+                return;
+            }
+
+            isSpinning = true;
+            spinButton.disabled = true;
+            betAmountInput.disabled = true;
+            startAutoSpinButton.disabled = true;
+            winningsDisplay.textContent = "";
+            clearConfetti();
+            clearHighlights(); // Limpa destaques de vitória anterior
+
+            playerBalance -= betAmount;
+            updateBalanceDisplay();
+
+            spinSound.currentTime = 0;
+            spinSound.play();
+
+            const finalGrid = [[], [], []]; // Representa a grade 3x3 de símbolos finais
+
+            const spinPromises = reelInners.map((reelInner, r) => {
+                return new Promise(resolve => {
+                    // Resetar transição para criar a ilusão de loop infinito na rolagem
+                    reelInner.style.transition = 'none';
+                    reelInner.style.transform = `translateY(0)`; // Volta para o topo instantaneamente
+
+                    // Adiciona alguns símbolos "dummy" no topo para a animação começar acima
+                    let dummySymbols = '';
+                    for (let i = 0; i < 9; i++) { // Mais dummy symbols para uma rolagem mais longa e suave
+                        dummySymbols += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+                    }
+                    reelInner.innerHTML = dummySymbols;
+
+                    // Os 3 símbolos finais que aparecerão na tela
+                    const reelFinalSymbols = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
+                    finalGrid[r] = reelFinalSymbols; // Armazena para verificação de ganho
+
+                    // Adiciona vários símbolos aleatórios para preencher a rolagem (pelo menos 20-30 para boa ilusão)
+                    let spinSymbolsHtml = '';
+                    for (let i = 0; i < 30; i++) {
+                        spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+                    }
+                    // Adiciona os símbolos finais desejados no final da sequência
+                    spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[0]}</span></div>`;
+                    spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[1]}</span></div>`;
+                    spinSymbolsHtml += `<div class="symbol-slot"><span class="symbol">${reelFinalSymbols[2]}</span></div>`;
+                    
+                    reelInner.innerHTML += spinSymbolsHtml; // Adiciona a sequência de símbolos após os dummies
+
+                    // Calcula o quanto o rolo precisa mover para parar nos símbolos corretos
+                    const totalVisibleSlots = 3; // O número de slots que queremos ver no final da rolagem
+                    const totalGeneratedSymbols = 9 + 30 + 3; // Dummies + Spin Symbols + Final Symbols
+                    const distanceToMove = (totalGeneratedSymbols - totalVisibleSlots) * SLOT_HEIGHT; 
+
+                    // Força o browser a renderizar o estado inicial antes da transição
+                    reelInner.offsetHeight; 
+                    reelInner.style.transition = ''; // Habilita a transição
+                    reelInner.classList.add('spin-animation');
+                    reelInner.style.setProperty('--spin-duration', `${SPIN_DURATION + (r * 0.2)}s`); // Atraso na parada por rolo
+                    reelInner.style.transform = `translateY(-${distanceToMove}px)`;
+
+                    reelInner.addEventListener('transitionend', function handler() {
+                        reelInner.classList.remove('spin-animation');
+                        reelInner.style.transition = 'none'; // Desabilita transição para o próximo giro
+                        
+                        // Limpa símbolos que rolaram para fora da vista e reposiciona os símbolos finais
+                        reelInner.innerHTML = '';
+                        reelFinalSymbols.forEach(symbol => {
+                            reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${symbol}</span></div>`;
+                        });
+                        reelInner.style.transform = `translateY(0)`; // Reseta a posição para os símbolos finais visíveis
+
+                        // Adiciona um flash ao parar o rolo
+                        reelContainers[r].classList.add('stop-flash');
+                        reelContainers[r].addEventListener('animationend', () => {
+                            reelContainers[r].classList.remove('stop-flash');
+                        }, { once: true });
+
+                        reelInner.removeEventListener('transitionend', handler);
+                        resolve(); // Resolve a Promise quando o rolo para
+                    }, { once: true });
+                });
+            });
+
+            // Espera todos os rolos pararem
+            await Promise.all(spinPromises);
+
+            spinSound.pause();
+            spinSound.currentTime = 0; // Reseta o som para o início
+
+            checkWin(finalGrid, betAmount);
+            isSpinning = false;
+            spinButton.disabled = false;
+            betAmountInput.disabled = false;
+            startAutoSpinButton.disabled = false;
+
+            // Auto-spin logic
+            if (autoSpinInterval && remainingAutoSpins > 0) {
+                remainingAutoSpins--;
+                console.log(`Auto-spin: ${remainingAutoSpins} spins remaining.`);
+                if (remainingAutoSpins > 0) {
+                    winningsDisplay.textContent += ` (${remainingAutoSpins} giros restantes)`;
+                    // Schedule the next spin
+                    spinTimeoutId = setTimeout(spinReels, 2500); // Atraso maior para ver a vitória no 3x3
+                } else {
+                    stopAutoSpin();
+                    winningsDisplay.textContent += " (Auto-giro concluído!)";
+                }
+            } else if (remainingAutoSpins === 0 && autoSpinInterval) {
+                 // This handles the case where the last spin just finished for auto-spin
+                 stopAutoSpin();
+                 winningsDisplay.textContent += " (Auto-giro concluído!)";
+            }
+        }
+
+
+        // --- Lógica de Verificação de Ganhos (5 Linhas de Pagamento + Wild + Multiplicador 10x) ---
+
+        // Definindo as 5 linhas de pagamento (índices [rolo][slot visível na tela])
+        const paylines = [
+            // Horizontais
+            [[0,0], [1,0], [2,0]], // Linha 1 (topo)
+            [[0,1], [1,1], [2,1]], // Linha 2 (meio)
+            [[0,2], [1,2], [2,2]], // Linha 3 (base)
+            // Diagonais
+            [[0,0], [1,1], [2,2]], // Linha 4 (diagonal principal)
+            [[0,2], [1,1], [2,0]]  // Linha 5 (diagonal secundária)
+        ];
+
+        function checkWin(finalGrid, betAmount) {
+            let totalWinAmount = 0;
+            let winningLinesCount = 0;
+            let highlightSlots = new Set(); // Para evitar duplicar destaques
+            let isBigWin = false;
+
+            // Verifica o multiplicador x10 (tela cheia com o mesmo símbolo ou com Wilds completando)
+            let fullScreenMatch = true;
+            let referenceSymbol = '';
+            
+            // Tenta encontrar um símbolo não-wild como referência primeiro
+            for (let r = 0; r < 3; r++) {
+                for (let s = 0; s < 3; s++) {
+                    if (finalGrid[r][s] !== '🐯') {
+                        referenceSymbol = finalGrid[r][s];
+                        break;
+                    }
+                }
+                if (referenceSymbol !== '') break;
+            }
+
+            // Se todos os símbolos são Wilds, o referência é Wild
+            if (referenceSymbol === '') {
+                referenceSymbol = '🐯';
+            }
+
+            for (let r = 0; r < 3; r++) {
+                for (let s = 0; s < 3; s++) {
+                    const currentSymbol = finalGrid[r][s];
+                    // Se não for wild E não for igual ao símbolo de referência, não é full screen match
+                    if (currentSymbol !== '🐯' && currentSymbol !== referenceSymbol) {
+                        fullScreenMatch = false;
+                        break;
+                    }
+                }
+                if (!fullScreenMatch) break;
+            }
+
+            for (const line of paylines) {
+                const s1 = finalGrid[line[0][0]][line[0][1]];
+                const s2 = finalGrid[line[1][0]][line[1][1]];
+                const s3 = finalGrid[line[2][0]][line[2][1]];
+
+                let lineWinAmount = 0;
+                let isLineWin = false;
+                let actualWinningSymbol = ''; 
+
+                // Lógica de combinação com Wild ('🐯')
+                // A ordem de verificação é importante para determinar o "símbolo real" da vitória
+                if (s1 === s2 && s2 === s3) { // 3 do mesmo (incluindo 3 Wilds)
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                } else if (s1 === '🐯' && s2 === s3) { // Wild no 1o rolo, 2 e 3 iguais
+                    isLineWin = true;
+                    actualWinningSymbol = s2;
+                } else if (s2 === '🐯' && s1 === s3) { // Wild no 2o rolo, 1 e 3 iguais
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                } else if (s3 === '🐯' && s1 === s2) { // Wild no 3o rolo, 1 e 2 iguais
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                } else if (s1 === '🐯' && s2 === '🐯') { // 2 Wilds, 3o símbolo
+                     isLineWin = true;
+                     actualWinningSymbol = s3; // O terceiro símbolo define o payout, se não for wild
+                     if (s3 === '🐯') actualWinningSymbol = '🐯'; // Se todos forem Wilds
+                } else if (s1 === '🐯' && s3 === '🐯') { // 2 Wilds, 2o símbolo
+                    isLineWin = true;
+                    actualWinningSymbol = s2;
+                    if (s2 === '🐯') actualWinningSymbol = '🐯'; // Se todos forem Wilds
+                } else if (s2 === '🐯' && s3 === '🐯') { // 2 Wilds, 1o símbolo
+                    isLineWin = true;
+                    actualWinningSymbol = s1;
+                    if (s1 === '🐯') actualWinningSymbol = '🐯'; // Se todos forem Wilds
+                }
+                
+                if (isLineWin) {
+                    lineWinAmount = payouts[actualWinningSymbol] * betAmount;
+                    totalWinAmount += lineWinAmount;
+                    winningLinesCount++;
+
+                    // Adiciona os slots vencedores ao conjunto para destaque
+                    highlightSlots.add(line[0][0] * 10 + line[0][1]); // encoding reel_idx and slot_idx
+                    highlightSlots.add(line[1][0] * 10 + line[1][1]);
+                    highlightSlots.add(line[2][0] * 10 + line[2][1]);
+                }
+            }
+
+            if (fullScreenMatch && referenceSymbol !== '') {
+                // If there's a full screen match (all same symbol or wild-filled)
+                // This means all 5 paylines would have hit for that symbol.
+                // You might want to override totalWinAmount and multiply it by 10x
+                console.log("FULL SCREEN MATCH! Applying 10x multiplier.");
+                totalWinAmount = (payouts[referenceSymbol] * betAmount * 5) * 10; // Base win for 5 lines * 10x
+                isBigWin = true;
+            }
+
+
+            if (totalWinAmount > 0) {
+                playerBalance += totalWinAmount;
+                updateBalanceDisplay();
+                winningsDisplay.textContent = `Você Ganhou: R$ ${totalWinAmount.toFixed(2)}!`;
+
+                if (totalWinAmount >= (betAmount * 5) || isBigWin) { // Define 'big win' as 5x bet or full screen
+                    bigWinSound.play();
+                    createConfetti();
+                } else {
+                    winSound.play();
+                }
+
+                // Apply highlights after determining all winning slots
+                highlightSlots.forEach(encodedPosition => {
+                    const reelIdx = Math.floor(encodedPosition / 10);
+                    const slotIdx = encodedPosition % 10;
+                    // Need to select the actual symbol element after the reel has settled
+                    const symbolElements = reelInners[reelIdx].querySelectorAll('.symbol-slot');
+                    if (symbolElements[slotIdx]) {
+                        symbolElements[slotIdx].classList.add('winning-symbol');
+                    }
+                });
+
+            } else {
+                winningsDisplay.textContent = "Não foi dessa vez. Tente novamente!";
+                noWinSound.play();
+            }
+        }
+
+        // --- Auto-Spin Functions ---
+        function startAutoSpin() {
+            const spins = parseInt(autoSpinCountInput.value);
+            if (isNaN(spins) || spins <= 0) {
+                alert("Por favor, insira um número válido de giros automáticos.");
+                return;
+            }
+            if (isSpinning) { // Prevents starting auto-spin while a manual spin is already in progress
+                console.log("Already spinning, cannot start auto-spin.");
+                return;
+            }
+            
+            console.log("Starting auto-spin. Initial spins:", spins);
+            remainingAutoSpins = spins;
+            autoSpinInterval = true; // Set the flag to true
+            startAutoSpinButton.style.display = 'none';
+            stopAutoSpinButton.style.display = 'inline-block';
+            
+            spinReels(); // Start the first auto-spin
+        }
+
+        function stopAutoSpin() {
+            console.log("Stopping auto-spin.");
+            clearTimeout(spinTimeoutId); // Clear any pending setTimeout for the next spin
+            autoSpinInterval = null; // Reset the flag
+            remainingAutoSpins = 0; // Reset count
+            spinButton.disabled = false;
+            betAmountInput.disabled = false;
+            startAutoSpinButton.style.display = 'inline-block';
+            stopAutoSpinButton.style.display = 'none';
+            winningsDisplay.textContent = "Auto-giro parado.";
+            clearConfetti(); // Clear any confetti if stopping mid-win
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalance();
+            updateBalanceDisplay();
+            updateBetDisplay();
+        });
+
+        betAmountInput.addEventListener('change', updateBetDisplay);
+        betAmountInput.addEventListener('keyup', updateBetDisplay); // Also update on keyup
+
+        // Attach event listeners for auto-spin buttons
+        startAutoSpinButton.addEventListener('click', startAutoSpin);
+        stopAutoSpinButton.addEventListener('click', stopAutoSpin);
+
+        // Initial setup for the reels (display some random symbols)
+        reelInners.forEach(reelInner => {
+            for (let i = 0; i < 3; i++) { // Show 3 initial random symbols
+                reelInner.innerHTML += `<div class="symbol-slot"><span class="symbol">${getRandomSymbol()}</span></div>`;
+            }
+        });
+    </script>
+</body>
+</html>
